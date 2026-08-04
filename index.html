@@ -38,137 +38,153 @@ html[data-daimon-size-tier="compact"] [data-kimi-priority="p3"] { display: none 
 .kimi-pixel-label-safe { position: relative; z-index: 2; }
 html[data-daimon-size-tier="compact"] .kimi-pixel-background { opacity: 0.4; }
 
-/* ======== MONO tokens（lieflat 灰阶梯，映射到 Daimon 运行时变量） ======== */
+/* ======== 「青囊 Clinical」设计令牌 ======== */
 [data-kimi-root] {
-  --ink:    var(--kimi-color-text-primary, #1C1C1A);
-  --paper:  var(--kimi-color-surface, #F0EFEB);
-  --cardbg: var(--kimi-color-surface-raised, #FAF9F6);
-  --muted:  var(--kimi-color-text-tertiary, #6A6963);
-  --faint:  var(--kimi-color-text-quaternary, #B0AFA9);
-  --grid:   var(--kimi-color-border, #D9D8D2);
-  --l2: color-mix(in srgb, var(--ink) 76%, var(--paper));
-  --l3: color-mix(in srgb, var(--ink) 58%, var(--paper));
-  --l4: color-mix(in srgb, var(--ink) 40%, var(--paper));
-  --l5: color-mix(in srgb, var(--ink) 24%, var(--paper));
+  --paper:  #F4F5F0;   /* 暖纸底 */
+  --cardbg: #FDFDFB;   /* 卡片面 */
+  --ink:    #172521;   /* 青黑（绝不纯黑） */
+  --accent: #0E7C6B;   /* 青囊绿：选中/主操作/正向状态 */
+  --accent-deep: #0A5D51;
+  --accent-soft: #E2EFEA; /* 青绿薄雾：高亮/闪烁 */
+  --amber:  #B75A1B;   /* 赭石：预警/负向 */
+  --amber-soft: #F7ECE2;
+  --muted:  #5C6F69;   /* 次级文字（青相灰，非纯灰） */
+  --faint:  #A7B4AE;   /* 更浅 */
+  --grid:   #E4E9E4;   /* 发丝线 */
   --mono-font: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --shadow-card: 0 1px 2px rgba(23,37,33,.05), 0 12px 32px -14px rgba(23,37,33,.12);
 }
-html, body { margin: 0; padding: 0; background: transparent; }
+html, body { margin: 0; padding: 0; background: var(--paper); }
 body { font-family: var(--kimi-font-sans, var(--mono-font)); color: var(--ink); font-size: 13.5px; line-height: 1.5; }
 .wb { padding: 10px 18px 18px; }
 
-/* ======== 卡片四件套（结论式标题 · 副标题 · 图 · 来源行） ======== */
+/* ======== 卡片 ======== */
 .card {
   background: var(--cardbg);
-  border-radius: 24px;
-  padding: 26px 28px 18px;
+  border-radius: 22px;
+  padding: 24px 26px 18px;
   margin-block-start: 14px;
   position: relative;
+  box-shadow: var(--shadow-card);
 }
-.card h2 { font-weight: 700; font-size: 16.5px; letter-spacing: -.02em; margin: 0 0 3px; font-family: var(--mono-font); }
+.card h2 { font-weight: 700; font-size: 16.5px; letter-spacing: -.02em; margin: 0 0 3px; font-family: var(--mono-font); display: flex; align-items: center; gap: 7px; }
+.card h2 .h-ic { color: var(--accent); display: inline-flex; flex: none; }
 .card .sub { font-size: 11.5px; color: var(--muted); margin-bottom: 14px; }
 .card .src { font-size: 9.5px; color: var(--faint); margin-top: 12px; letter-spacing: .08em; font-weight: 500; text-transform: uppercase; font-family: var(--mono-font); }
 .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 .card svg { width: 100%; display: block; }
 .card svg text { font-family: var(--mono-font); }
 
-/* ======== 动画（quarticOut 快进快停 · 滚入才播） ======== */
+/* ======== 动画（滚入才播 · 快进快停） ======== */
 .pop { transform-box: fill-box; transform-origin: center; }
-.card.in .pop { animation: pop .5s cubic-bezier(.2,.7,.3,1.3) both; }
+.card.in .pop { animation: pop .45s cubic-bezier(.2,.7,.3,1.3) both; }
 .fade { opacity: 0; }
-.card.in .fade { animation: fade .8s cubic-bezier(.4,0,.2,1) both; }
+.card.in .fade { animation: fade .7s cubic-bezier(.4,0,.2,1) both; }
 @keyframes pop { from { transform: scale(0); } to { transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 .card.in .fade, .card.in .pop { animation-delay: var(--d, 0s); }
+@keyframes rowflash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+tr.row-flash td { animation: rowflash 1.4s ease-out 2; }
+@keyframes dotpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(2.1); } }
+g.dot-pulse { transform-box: fill-box; transform-origin: center; animation: dotpulse .5s ease-in-out 3; }
+
+/* ======== 图表交互态 ======== */
+g.hit { cursor: pointer; transform-box: fill-box; transform-origin: center; transition: transform .16s ease; }
+g.hit:hover { transform: scale(1.45); }
+.chart-tip {
+  position: absolute; z-index: 6; pointer-events: none;
+  background: var(--ink); color: #F4F5F0;
+  font-size: 10.5px; line-height: 1.5; font-family: var(--mono-font);
+  padding: 7px 10px; border-radius: 9px;
+  box-shadow: 0 6px 18px -6px rgba(23,37,33,.35);
+  opacity: 0; transition: opacity 130ms ease;
+  max-inline-size: 260px; white-space: pre-line;
+}
+.chart-tip.on { opacity: 1; }
+.chart-tip .t-metric { color: #7FD9C6; font-weight: 700; }
 
 /* ======== 页眉 ======== */
 .wb-header { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .brand { display: flex; align-items: baseline; gap: 10px; min-inline-size: 0; }
-.brand-mark { inline-size: 9px; block-size: 9px; background: var(--ink); border-radius: 50%; align-self: center; flex: none; }
+.brand-mark { inline-size: 9px; block-size: 9px; background: var(--accent); border-radius: 50%; align-self: center; flex: none; }
 .wb-title { font-size: 17.5px; font-weight: 700; letter-spacing: -.02em; margin: 0; font-family: var(--mono-font); }
 .wb-sub { color: var(--muted); font-size: 11.5px; margin: 2px 0 0; }
 .wb-meta { font-size: 9.5px; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; font-family: var(--mono-font); }
 
-/* ======== P0 GLANCE 大数字带 ======== */
+/* ======== GLANCE 大数字带 ======== */
 .glance { padding-block-end: 20px; }
 .kpi-row { display: grid; grid-template-columns: 1.7fr repeat(5, 1fr); }
 .kpi { min-inline-size: 0; padding-inline-start: 18px; border-inline-start: 1px solid var(--grid); }
 .kpi:first-child { padding-inline-start: 0; border-inline-start: 0; }
-.kpi .k-label { color: var(--muted); font-size: 10px; display: block; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; font-family: var(--mono-font); }
+.kpi .k-label { color: var(--muted); font-size: 10px; display: flex; align-items: center; gap: 5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; font-family: var(--mono-font); }
+.kpi .k-label .k-ic { color: var(--accent); display: inline-flex; flex: none; }
 .kpi output { display: block; font-size: 24px; font-weight: 800; line-height: 1.18; font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin-block-start: 3px; font-family: var(--mono-font); }
-.kpi-hero output { font-size: 42px; font-weight: 800; }
-.kpi .k-delta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; display: block; margin-block-start: 2px; }
-.k-delta .arrow { font-size: 9px; }
+.kpi-hero output { font-size: 42px; font-weight: 800; color: var(--accent-deep); }
+.kpi .k-delta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 4px; margin-block-start: 2px; }
+.k-delta .arr-up { color: var(--accent); display: inline-flex; }
+.k-delta .arr-down { color: var(--amber); display: inline-flex; }
 
-/* ======== 指标切换 segmented（mono 药丸） ======== */
+/* ======== segmented / chips ======== */
 .seg { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.seg button {
+.seg button, .chips button {
   border: 1px dashed var(--faint); background: transparent; color: var(--muted);
   font: inherit; font-family: var(--mono-font); font-size: 10.5px; font-weight: 600; letter-spacing: .04em;
   padding: 4px 12px; border-radius: 99px; cursor: pointer;
-  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
 }
-.seg button:hover { border-color: var(--l3); color: var(--ink); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
-.seg button:focus-visible { outline: 2px solid var(--l3); outline-offset: 2px; }
+.seg button:hover, .chips button:hover { border-color: var(--accent); color: var(--accent-deep); }
+.seg button[aria-pressed="true"], .chips button[aria-pressed="true"] { background: var(--accent); color: #F4F5F0; border: 1px solid var(--accent); }
+.seg button:focus-visible, .chips button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-block-end: 10px; }
+.chips button { font-weight: 500; padding: 3px 11px; }
 
-/* ======== duo 栅格：涨粉榜 + 洞察列 ======== */
+/* ======== duo：涨粉榜 + 洞察列 ======== */
 .duo { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; align-items: stretch; }
 .duo > .card { margin-block-start: 14px; }
-.notes { display: flex; flex-direction: column; gap: 0; }
+.notes { display: flex; flex-direction: column; }
 .note { border-block-start: 1px solid var(--grid); padding: 13px 0 11px; }
 .note:first-child { border-block-start: 0; padding-block-start: 2px; }
-.note .n-tag { font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; font-family: var(--mono-font); }
-.note .n-val { font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; display: block; line-height: 1.25; margin-block-start: 2px; font-family: var(--mono-font); }
+.note .n-tag { font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono-font); }
+.note .n-tag .n-ic { color: var(--accent); display: inline-flex; }
+.note .n-val { font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; display: block; line-height: 1.25; margin-block-start: 3px; font-family: var(--mono-font); }
 .note .n-desc { font-size: 11px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.note.warn .n-tag { border: 1px dashed var(--l3); border-radius: 99px; display: inline-block; padding: 2px 8px; }
-.note.warn .n-val { color: var(--l2); }
+.note.warn .n-tag { border: 1px dashed var(--amber); color: var(--amber); border-radius: 99px; padding: 2px 9px; }
+.note.warn .n-tag .n-ic { color: var(--amber); }
+.note.warn .n-val { color: var(--amber); }
 
-/* ======== 话题筛选 chips ======== */
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-block-end: 10px; }
-.chips button {
-  border: 1px dashed var(--faint); background: transparent; color: var(--muted);
-  font: inherit; font-family: var(--mono-font); font-size: 10.5px; font-weight: 500;
-  padding: 3px 11px; border-radius: 99px; cursor: pointer;
-  transition: background-color 140ms ease, color 140ms ease;
-}
-.chips button:hover { border-color: var(--l3); color: var(--ink); }
-.chips button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border: 1px solid var(--ink); }
-.chips button:focus-visible { outline: 2px solid var(--l3); outline-offset: 2px; }
+/* ======== 战报增量带（今日/本周共用） ======== */
+.daily-row { display: grid; grid-template-columns: repeat(4, 1fr); }
+.d-item { min-inline-size: 0; padding-inline-start: 18px; border-inline-start: 1px solid var(--grid); }
+.d-item:first-child { padding-inline-start: 0; border-inline-start: 0; }
+.d-item .d-label { color: var(--muted); font-size: 10px; display: flex; align-items: center; gap: 5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; font-family: var(--mono-font); }
+.d-item .d-label .d-ic { color: var(--accent); display: inline-flex; flex: none; }
+.d-item output { display: flex; align-items: center; gap: 5px; font-size: 26px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin-block-start: 3px; font-family: var(--mono-font); }
+.d-item output.neg { color: var(--amber); }
+.d-item output.pos { color: var(--accent-deep); }
+.d-item .d-note { font-size: 10.5px; color: var(--faint); display: block; margin-block-start: 1px; }
 
-/* ======== 账本式明细表（发丝横线 · 无竖线） ======== */
-.table-wrap { max-block-size: 420px; overflow-y: auto; border-block-start: 1px solid var(--ink); }
+/* ======== 账本式明细表 ======== */
+.table-wrap { max-block-size: 420px; overflow-y: auto; border-block-start: 2px solid var(--ink); }
 table.works { border-collapse: collapse; inline-size: 100%; font-size: 12px; }
 table.works th {
   position: sticky; inset-block-start: 0; z-index: 3;
   background: var(--cardbg);
-  text-align: start; font-weight: 600; color: var(--muted);
+  text-align: start; font-weight: 700; color: var(--muted);
   font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; font-family: var(--mono-font);
   padding: 8px 8px 7px; border-block-end: 1px solid var(--ink);
   cursor: pointer; user-select: none; white-space: nowrap;
 }
-table.works th .sort-mark { color: var(--ink); font-weight: 800; }
+table.works th .sort-mark { color: var(--accent); font-weight: 800; }
 table.works td { padding: 8px; border-block-end: 1px solid var(--grid); font-variant-numeric: tabular-nums; white-space: nowrap; }
-table.works tbody tr:hover td { background: color-mix(in srgb, var(--ink) 3.5%, transparent); }
+table.works tbody tr { cursor: pointer; transition: background-color 140ms ease; }
+table.works tbody tr:hover td { background: var(--accent-soft); }
 table.works td.cell-desc { max-inline-size: 250px; overflow: hidden; text-overflow: ellipsis; }
 table.works td .date { display: block; color: var(--faint); font-size: 10px; letter-spacing: .04em; }
-.vbar { display: inline-block; block-size: 3px; background: var(--l4); vertical-align: middle; margin-inline-end: 7px; }
-.num-pos { font-weight: 700; }
-.num-neg { color: var(--faint); }
-.badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .06em; padding: 1px 7px; border-radius: 99px; margin-inline-start: 6px; background: var(--ink); color: var(--paper); vertical-align: 1px; }
-.badge.warn { background: transparent; border: 1px dashed var(--l3); color: var(--l2); }
-
-/* ======== P0 今日战报（增量带） ======== */
-.daily-row { display: grid; grid-template-columns: repeat(4, 1fr); }
-.d-item { min-inline-size: 0; padding-inline-start: 18px; border-inline-start: 1px solid var(--grid); }
-.d-item:first-child { padding-inline-start: 0; border-inline-start: 0; }
-.d-item .d-label { color: var(--muted); font-size: 10px; display: block; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; font-family: var(--mono-font); }
-.d-item output { display: block; font-size: 26px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin-block-start: 3px; font-family: var(--mono-font); }
-.d-item output.neg { color: var(--l3); }
-.d-item .d-note { font-size: 10.5px; color: var(--faint); display: block; }
-@container (max-width: 559px) {
-  .daily-row { grid-template-columns: 1fr 1fr; row-gap: 14px; }
-  .d-item { border-inline-start: 0; padding-inline-start: 0; }
-}
+.vbar { display: inline-block; block-size: 3px; background: var(--accent); vertical-align: middle; margin-inline-end: 7px; border-radius: 2px; }
+.num-pos { color: var(--accent-deep); font-weight: 700; }
+.num-neg { color: var(--amber); }
+.badge { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .06em; padding: 1px 7px; border-radius: 99px; margin-inline-start: 6px; background: var(--accent); color: #F4F5F0; vertical-align: 1px; }
+.badge.warn { background: transparent; border: 1px dashed var(--amber); color: var(--amber); }
 
 /* ======== 页脚 ======== */
 .wb-footer { margin-block-start: 16px; color: var(--faint); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; font-family: var(--mono-font); }
@@ -187,6 +203,8 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
   .kpi-row { grid-template-columns: 1fr 1fr; row-gap: 14px; }
   .kpi { border-inline-start: 0; padding-inline-start: 0; }
   .kpi-hero output { font-size: 32px; }
+  .daily-row { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+  .d-item { border-inline-start: 0; padding-inline-start: 0; }
 }
 </style>
 </head>
@@ -206,62 +224,51 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
       <span class="wb-meta" data-field="meta-right">DOCTOR MEDIA WORKBENCH</span>
     </header>
 
-    <!-- P0：账号一览（GLANCE 大数字带） -->
+    <!-- P0：账号一览 -->
     <section class="card glance kimi-pixel-label-safe" data-kimi-priority="p0" aria-label="账号核心指标">
-      <div class="kpi-row">
-        <div class="kpi kpi-hero">
-          <span class="k-label">粉丝 Fans</span>
-          <output data-field="fans">—</output>
-          <span class="k-delta" data-field="fans-delta"></span>
-        </div>
-        <div class="kpi"><span class="k-label">7日播放</span><output data-field="d7-views">—</output></div>
-        <div class="kpi"><span class="k-label">7日点赞</span><output data-field="d7-likes">—</output></div>
-        <div class="kpi"><span class="k-label">7日分享</span><output data-field="d7-shares">—</output></div>
-        <div class="kpi"><span class="k-label">7日评论</span><output data-field="d7-comments">—</output></div>
-        <div class="kpi"><span class="k-label">累计获赞</span><output data-field="total-likes">—</output></div>
-      </div>
+      <div class="kpi-row" data-field="kpi-row"></div>
       <div class="src" data-field="kpi-src">ACCOUNT AT A GLANCE · 抖音创作者中心</div>
     </section>
 
-    <!-- P0：今日战报（与上一快照对比的增量） -->
+    <!-- P0：今日战报 -->
     <section class="card daily kimi-pixel-label-safe" data-kimi-priority="p0" data-field="daily-card" style="display:none" aria-label="今日战报">
-      <h2>今日战报</h2>
+      <h2><span class="h-ic" data-ic="activity"></span>今日战报</h2>
       <div class="sub" data-field="daily-sub"></div>
       <div class="daily-row" data-field="daily-row"></div>
       <div class="src">DAILY DELTA · 与上一快照对比 · 每日自动更新</div>
     </section>
 
-    <!-- P0：本周战报（每周日更新，近7天 vs 前7天） -->
+    <!-- P0：本周战报 -->
     <section class="card weekly kimi-pixel-label-safe" data-kimi-priority="p0" data-field="weekly-card" style="display:none" aria-label="本周战报">
-      <h2 data-field="weekly-title">本周战报</h2>
+      <h2><span class="h-ic" data-ic="calendar"></span><span data-field="weekly-title">本周战报</span></h2>
       <div class="sub" data-field="weekly-sub"></div>
       <div class="daily-row" data-field="weekly-row"></div>
       <div class="src">WEEKLY REVIEW · 近7天 VS 前7天 · 每周日自动更新</div>
     </section>
 
-    <!-- P1：作品趋势（L3 BARCODE LOLLIPOP） -->
+    <!-- P1：作品趋势（BARCODE LOLLIPOP） -->
     <section class="card kimi-pixel-label-safe" data-kimi-priority="p1">
       <div class="card-head">
         <div style="min-inline-size:0">
-          <h2 data-field="chart-title">作品趋势</h2>
+          <h2><span class="h-ic" data-ic="trending"></span><span data-field="chart-title">作品趋势</span></h2>
           <div class="sub" data-field="chart-sub"></div>
         </div>
         <div class="seg" role="group" aria-label="选择趋势指标" data-field="metric-seg"></div>
       </div>
       <svg id="barcode" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="作品指标随发布时间条码图"></svg>
-      <div class="src">BARCODE LOLLIPOP · LUPI EDITORIAL · 按发布时间</div>
+      <div class="src">BARCODE LOLLIPOP · 虚线为中位数基准 · 点圆点可定位到账本</div>
     </section>
 
-    <!-- P1：涨粉榜（C1 TICK ROWS） + 洞察列 -->
+    <!-- P1：涨粉榜 + 洞察列 -->
     <div class="duo" data-kimi-priority="p1">
       <section class="card kimi-pixel-label-safe" style="margin-block-start:0">
-        <h2 data-field="rank-title">涨粉榜</h2>
+        <h2><span class="h-ic" data-ic="flame"></span><span data-field="rank-title">涨粉榜</span></h2>
         <div class="sub" data-field="rank-sub"></div>
         <svg id="tickrows" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet" role="img" aria-label="涨粉排行刻度条"></svg>
-        <div class="src">TICK ROWS · LUPI BASIC · 涨粉 TOP 8</div>
+        <div class="src">TICK ROWS · 涨粉 TOP 8 · 点行可定位到账本</div>
       </section>
       <section class="card kimi-pixel-label-safe" style="margin-block-start:0">
-        <h2>四条注脚</h2>
+        <h2><span class="h-ic" data-ic="zap"></span>四条注脚</h2>
         <div class="sub">谁在涨 · 谁在播 · 谁留人 · 谁劝退</div>
         <div class="notes" data-field="insights"></div>
         <div class="src">MARGIN NOTES · 播放≥1万作品池</div>
@@ -272,7 +279,7 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
     <section class="card kimi-pixel-label-safe" data-kimi-priority="p2">
       <div class="card-head">
         <div style="min-inline-size:0">
-          <h2>全部作品账本</h2>
+          <h2><span class="h-ic" data-ic="rows"></span>全部作品账本</h2>
           <div class="sub" data-field="table-note"></div>
         </div>
       </div>
@@ -283,7 +290,7 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
           <tbody></tbody>
         </table>
       </div>
-      <div class="src">LEDGER · 仅审核通过的公开作品 · 点击表头排序</div>
+      <div class="src">LEDGER · 仅审核通过的公开作品 · 点表头排序 · 点行定位到趋势图</div>
     </section>
 
     <footer class="wb-footer kimi-pixel-label-safe" data-kimi-priority="p3">
@@ -378,13 +385,43 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
 })(window);
 
 /* ======== 初始数据（真实存档快照，首次运行前展示） ======== */
-const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi", "fans": 41700, "fans_text": "4.17万", "total_likes_text": "50.75万", "follows": 41, "last_7d": {"views": 125100, "homepage_visits": 2237, "likes": null, "shares": 465, "comments": 88, "net_fans": null}, "snapshot_at": "2026-08-04 11:31:41"}, "fetched_at": "2026-08-04 11:31:42", "total": 36, "topics": ["抖出健康知识宝藏", "痘痘", "痤疮", "减肥", "祛痘", "健康科普破圈计划", "健康科普", "医学科普"], "works": [{"id": "7665932160284495131", "publish_date": "2026-07-24 17:30", "desc": "姨妈痘总来？内调思路帮你搞定。 #痘痘 #姨妈痘 #痤疮 #祛痘 #抖出健康知识宝藏", "duration_sec": 250, "views": 79020.0, "likes": 1507.0, "comments": 28.0, "shares": 190.0, "favorites": 417.0, "danmaku": 0, "completion_rate": 0.76, "completion_rate_5s": 17.5557, "bounce_rate_2s": 49.9683, "avg_view_sec": 11.0752, "cover_click_rate": 100.0, "new_fans": 166.0, "lost_fans": 10.0, "homepage_visits": 477.0, "topics": ["痘痘", "痤疮", "祛痘", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7663447775216012578", "publish_date": "2026-07-17 19:19", "desc": "熬夜爆痘该怎么办，一条视频教你用底层逻辑破解痘痘难题 #痘痘 #熬夜 #长痘痘 #祛痘 #抖出健康知识宝藏 @抖音小助手", "duration_sec": 238, "views": 93038.0, "likes": 2525.0, "comments": 50.0, "shares": 135.0, "favorites": 597.0, "danmaku": 0, "completion_rate": 0.6729, "completion_rate_5s": 20.3711, "bounce_rate_2s": 50.471, "avg_view_sec": 8.5563, "cover_click_rate": 40.6168, "new_fans": 64.0, "lost_fans": 26.0, "homepage_visits": 520.0, "topics": ["痘痘", "祛痘", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7657854396172160296", "publish_date": "2026-07-02 19:10", "desc": "运动爆痘收官战！文献认证的抗炎方案来啦！！！ #痘痘 #痤疮 #抗炎 #运动 #抖出健康知识宝藏", "duration_sec": 212, "views": 1246226.0, "likes": 58024.0, "comments": 306.0, "shares": 6499.0, "favorites": 31040.0, "danmaku": 9.0, "completion_rate": 0.6335, "completion_rate_5s": 36.1753, "bounce_rate_2s": 31.7735, "avg_view_sec": 11.0918, "cover_click_rate": 100.0, "new_fans": 9296.0, "lost_fans": 151.0, "homepage_visits": 44863.0, "topics": ["痘痘", "痤疮", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7655238693359226154", "publish_date": "2026-06-25 18:00", "desc": "千万别乱挤下颌痘！小痘痘容易变成硬瘢痕疙瘩！！！ #痘痘 #瘢痕疙瘩  #曲尼司特 #痘肌饮食 #抖出健康知识宝藏", "duration_sec": 271, "views": 610020.0, "likes": 15288.0, "comments": 471.0, "shares": 3622.0, "favorites": 6691.0, "danmaku": 3.0, "completion_rate": 0.7711, "completion_rate_5s": 44.0021, "bounce_rate_2s": 34.6965, "avg_view_sec": 16.6467, "cover_click_rate": 100.0, "new_fans": 1292.0, "lost_fans": 40.0, "homepage_visits": 8074.0, "topics": ["痘痘", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7652675629367840019", "publish_date": "2026-06-18 18:25", "desc": "运动本身到底对痘痘有什么影响，一条视频带你看懂 #痤疮 #痘痘 #长痘的原因 #运动 #抖出健康知识宝藏", "duration_sec": 289, "views": 563408.0, "likes": 23239.0, "comments": 215.0, "shares": 2324.0, "favorites": 7696.0, "danmaku": 0, "completion_rate": 0.7265, "completion_rate_5s": 43.0996, "bounce_rate_2s": 33.7521, "avg_view_sec": 18.9082, "cover_click_rate": 100.0, "new_fans": 1980.0, "lost_fans": 38.0, "homepage_visits": 11282.0, "topics": ["痤疮", "痘痘", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7650072903425314088", "publish_date": "2026-06-11 18:05", "desc": "运动爆痘三部曲第一期，一条视频搞懂蛋白粉跟痤疮的关系 #痤疮 #爆痘 #健身 #健身长痘 #抖出健康知识宝藏", "duration_sec": 301, "views": 141941.0, "likes": 4397.0, "comments": 90.0, "shares": 667.0, "favorites": 1514.0, "danmaku": 0, "completion_rate": 0.6492, "completion_rate_5s": 38.5791, "bounce_rate_2s": 40.7215, "avg_view_sec": 19.1289, "cover_click_rate": 100.0, "new_fans": 448.0, "lost_fans": 10.0, "homepage_visits": 2439.0, "topics": ["痤疮", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7647458050189610286", "publish_date": "2026-06-04 18:45", "desc": "你喝牛奶长痘吗？斯主任一条视频帮你揭开牛奶长痘的真相。 #痘痘 #痤疮 #长痘的原因 #健身长痘 #抖出健康知识宝藏", "duration_sec": 231, "views": 134278.0, "likes": 3255.0, "comments": 70.0, "shares": 568.0, "favorites": 587.0, "danmaku": 0, "completion_rate": 1.0463, "completion_rate_5s": 28.7637, "bounce_rate_2s": 43.4241, "avg_view_sec": 15.159, "cover_click_rate": 69.6036, "new_fans": 295.0, "lost_fans": 11.0, "homepage_visits": 1005.0, "topics": ["痘痘", "痤疮", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7641906493566094644", "publish_date": "2026-05-20 17:55", "desc": "吃对这4个防晒营养素，也能让你的皮肤自带 防晒buff #防晒 #护肤 #美白 #营养健康 #抖出健康知识宝藏", "duration_sec": 222, "views": 80164.0, "likes": 1036.0, "comments": 10.0, "shares": 213.0, "favorites": 443.0, "danmaku": 0, "completion_rate": 1.2926, "completion_rate_5s": 31.5425, "bounce_rate_2s": 46.7108, "avg_view_sec": 13.0701, "cover_click_rate": 27.0493, "new_fans": 141.0, "lost_fans": 4.0, "homepage_visits": 405.0, "topics": ["抖出健康知识宝藏"], "month": "2026-05"}, {"id": "7637457724694859044", "publish_date": "2026-05-08 18:11", "desc": "重度痤疮，真的只能硬抗异维A酸吗？ #痤疮 #痘痘反复 #祛痘 #抖出健康知识宝藏 #曲尼司特", "duration_sec": 244, "views": 220756.0, "likes": 5896.0, "comments": 130.0, "shares": 574.0, "favorites": 1601.0, "danmaku": 0, "completion_rate": 0.9944, "completion_rate_5s": 34.8148, "bounce_rate_2s": 43.1679, "avg_view_sec": 16.1317, "cover_click_rate": 74.9484, "new_fans": 214.0, "lost_fans": 18.0, "homepage_visits": 2144.0, "topics": ["痤疮", "祛痘", "抖出健康知识宝藏"], "month": "2026-05"}, {"id": "7628173994507734310", "publish_date": "2026-04-13 17:41", "desc": "5分钟讲透“肠皮轴”：从医学底层逻辑彻底终结反复爆痘。 #痘痘 #祛痘 #肠道健康 #健康科普 #抖出健康知识宝藏", "duration_sec": 256, "views": 275092.0, "likes": 7586.0, "comments": 97.0, "shares": 1648.0, "favorites": 3316.0, "danmaku": 1.0, "completion_rate": 1.209, "completion_rate_5s": 34.3569, "bounce_rate_2s": 44.7244, "avg_view_sec": 16.6053, "cover_click_rate": 23.4997, "new_fans": 483.0, "lost_fans": 22.0, "homepage_visits": 2593.0, "topics": ["痘痘", "祛痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-04"}, {"id": "7627009288266943771", "publish_date": "2026-04-10 18:30", "desc": "今年必看的5分钟祛痘科普，2026最新研究全拆解！！！ #痘痘  #祛痘 #肠道健康 #健康科普 #抖出健康知识宝藏", "duration_sec": 317, "views": 1223252.0, "likes": 48511.0, "comments": 728.0, "shares": 10365.0, "favorites": 30221.0, "danmaku": 9.0, "completion_rate": 2.0109, "completion_rate_5s": 37.9796, "bounce_rate_2s": 29.1758, "avg_view_sec": 23.8607, "cover_click_rate": 11.281, "new_fans": 3152.0, "lost_fans": 85.0, "homepage_visits": 21524.0, "topics": ["痘痘", "祛痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-04"}, {"id": "7620341573468966196", "publish_date": "2026-03-23 18:00", "desc": "祛痘不去根，消了也复发 #痤疮 #痘痘反复 #痘印 #抖出健康知识宝藏 #健康科普破圈计划", "duration_sec": 230, "views": 684514.0, "likes": 19782.0, "comments": 277.0, "shares": 3403.0, "favorites": 9107.0, "danmaku": 3.0, "completion_rate": 1.0304, "completion_rate_5s": 38.2465, "bounce_rate_2s": 37.6719, "avg_view_sec": 16.7914, "cover_click_rate": 10.2665, "new_fans": 975.0, "lost_fans": 50.0, "homepage_visits": 9868.0, "topics": ["痤疮", "抖出健康知识宝藏", "健康科普破圈计划"], "month": "2026-03"}, {"id": "7603637389839420723", "publish_date": "2026-02-14 20:20", "desc": "回家过年不爆痘，饮食营养是基础 #痤疮痘痘 #抖音新春特别会 #欢笑中国年 #新年囤点专业货 #抖出健康知识宝藏", "duration_sec": 249, "views": 115132.0, "likes": 1665.0, "comments": 17.0, "shares": 170.0, "favorites": 292.0, "danmaku": 0, "completion_rate": 0.4781, "completion_rate_5s": 20.9466, "bounce_rate_2s": 56.788, "avg_view_sec": 8.5594, "cover_click_rate": 19.0851, "new_fans": 102.0, "lost_fans": 21.0, "homepage_visits": 686.0, "topics": ["抖出健康知识宝藏"], "month": "2026-02"}, {"id": "7600691584862096691", "publish_date": "2026-01-29 20:20", "desc": "26年解锁适合你的【抗炎】新宠——茶！ #茶多酚 #变瘦变美 #抖出健康知识宝藏 #油痘肌 #绿茶", "duration_sec": 270, "views": 758774.0, "likes": 20498.0, "comments": 503.0, "shares": 4528.0, "favorites": 6508.0, "danmaku": 2.0, "completion_rate": 0.7919, "completion_rate_5s": 36.2956, "bounce_rate_2s": 35.8339, "avg_view_sec": 15.4771, "cover_click_rate": 9.231, "new_fans": 1495.0, "lost_fans": 47.0, "homepage_visits": 7899.0, "topics": ["抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7595889840747466003", "publish_date": "2026-01-16 20:20", "desc": "油也会致痘吗？这些糟糕的油脂，暗中助长了你脸上的痘痘 #痤疮 #拒绝坏油 #健康科普 #抖出健康知识宝藏", "duration_sec": 333, "views": 343566.0, "likes": 10008.0, "comments": 144.0, "shares": 2252.0, "favorites": 4302.0, "danmaku": 3.0, "completion_rate": 1.037, "completion_rate_5s": 41.7562, "bounce_rate_2s": 33.7134, "avg_view_sec": 20.127, "cover_click_rate": 16.1971, "new_fans": 1242.0, "lost_fans": 28.0, "homepage_visits": 4577.0, "topics": ["痤疮", "健康科普", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7592168919549381938", "publish_date": "2026-01-07 20:20", "desc": "外卖、奶茶、熬夜：当代年轻人的 “痤疮铁三角” #痤疮 #痘痘 #健康科普 #抖出健康知识宝藏", "duration_sec": 0, "views": 54980.0, "likes": 1072.0, "comments": 49.0, "shares": 295.0, "favorites": 589.0, "danmaku": 0, "completion_rate": 0.0, "completion_rate_5s": null, "bounce_rate_2s": 49.973, "avg_view_sec": null, "cover_click_rate": 100.0, "new_fans": 102.0, "lost_fans": 10.0, "homepage_visits": 1107.0, "topics": ["痤疮", "痘痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7591420923136331051", "publish_date": "2026-01-04 20:20", "desc": "4种营养素，痘肌人要怎么吃，才能改善痤疮反复发作 #痤疮 #痘痘 #变瘦变美 #抖出健康知识宝藏 #我的年度健康盘点", "duration_sec": 444, "views": 2798547.0, "likes": 91957.0, "comments": 1193.0, "shares": 24074.0, "favorites": 59778.0, "danmaku": 21.0, "completion_rate": 1.7841, "completion_rate_5s": 37.6177, "bounce_rate_2s": 33.0588, "avg_view_sec": 22.1881, "cover_click_rate": 8.5066, "new_fans": 8903.0, "lost_fans": 174.0, "homepage_visits": 32931.0, "topics": ["痤疮", "痘痘", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7587358911729061135", "publish_date": "2025-12-24 20:00", "desc": "你有戒不掉的糖瘾吗？水果中的糖是健康糖吗？ 学会控制添加糖的摄入，你的脸蛋和身体才不会被糖“腐蚀”掉。#糖瘾 #变瘦变美 #我的年度健康盘点 #抖出健康知识宝藏 #胰岛素抵抗", "duration_sec": 328, "views": 180200.0, "likes": 2915.0, "comments": 141.0, "shares": 2441.0, "favorites": 1143.0, "danmaku": 4.0, "completion_rate": 2.2251, "completion_rate_5s": 41.0028, "bounce_rate_2s": 31.5434, "avg_view_sec": 25.1429, "cover_click_rate": 12.1681, "new_fans": 335.0, "lost_fans": 11.0, "homepage_visits": 1134.0, "topics": ["抖出健康知识宝藏"], "month": "2025-12"}, {"id": "7584761933237210418", "publish_date": "2025-12-17 17:50", "desc": "低门槛抗炎饮食，你也能吃出好气色！ #如何养好自己的气色 你知道膳食炎症指数DII吗？这是南卡罗来纳大学开发的饮食炎症评分系统（DII），今天我要跟大家科普这个 “藏在饮食里的气色密码”。\n可能很多朋友没听过，但DII的核心逻辑特别好懂：它", "duration_sec": 320, "views": 265352.0, "likes": 7144.0, "comments": 83.0, "shares": 1289.0, "favorites": 2444.0, "danmaku": 7.0, "completion_rate": 2.3927, "completion_rate_5s": 30.8809, "bounce_rate_2s": 35.7477, "avg_view_sec": 24.9397, "cover_click_rate": 8.2034, "new_fans": 684.0, "lost_fans": 21.0, "homepage_visits": 1946.0, "topics": [], "month": "2025-12"}, {"id": "7582530282645916980", "publish_date": "2025-12-11 20:20", "desc": "你的肠道藏着调节免疫力的关键！ 人体约70%~80%的免疫细胞都集中在肠道中，这条视频跟你讲清楚肠道与免疫力的关系。#免疫力 #肠道健康 #我的年度健康盘点 #抖出健康知识宝藏#医学科普", "duration_sec": 331, "views": 101263.0, "likes": 925.0, "comments": 34.0, "shares": 728.0, "favorites": 638.0, "danmaku": 8.0, "completion_rate": 1.5702, "completion_rate_5s": 24.6458, "bounce_rate_2s": 38.4646, "avg_view_sec": 22.6927, "cover_click_rate": 10.147, "new_fans": 189.0, "lost_fans": 10.0, "homepage_visits": 464.0, "topics": ["抖出健康知识宝藏", "医学科普"], "month": "2025-12"}, {"id": "7576881615641562403", "publish_date": "2025-11-26 16:30", "desc": "为什么你会反复长痘，今天4条原因，帮你全面分析痘痘 #痘痘 #痤疮 #科普  #健康科普破圈计划 #抖出健康知识宝藏", "duration_sec": 398, "views": 1286917.0, "likes": 47703.0, "comments": 1200.0, "shares": 9736.0, "favorites": 22322.0, "danmaku": 238.0, "completion_rate": 1.126, "completion_rate_5s": 34.8859, "bounce_rate_2s": 40.6055, "avg_view_sec": 25.3807, "cover_click_rate": 11.2327, "new_fans": 4759.0, "lost_fans": 112.0, "homepage_visits": 35737.0, "topics": ["痘痘", "痤疮", "健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-11"}, {"id": "7572128464099118379", "publish_date": "2025-11-13 16:45", "desc": "痤疮痘痘的本质就是油多了、堵住了、菌多了、出现炎症了 治好痘痘后想要避免复发，管住嘴是关键，营养斯教你从饮食和生活上下手 #痘痘 #痤疮 #科学变美#健康科普破圈计划 #抖出健康知识宝藏", "duration_sec": 241, "views": 3181810.0, "likes": 118274.0, "comments": 3780.0, "shares": 30558.0, "favorites": 58513.0, "danmaku": 1298.0, "completion_rate": 1.7718, "completion_rate_5s": 39.8929, "bounce_rate_2s": 33.4751, "avg_view_sec": 17.8106, "cover_click_rate": 26.575, "new_fans": 6214.0, "lost_fans": 163.0, "homepage_visits": 39920.0, "topics": ["痘痘", "痤疮", "健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-11"}, {"id": "7561751410145103138", "publish_date": "2025-10-16 17:37", "desc": "精力差、怀疑免疫力背刺自己，那你可以试试关注维生素D！ 超全维生素D攻略它来了#维生素D #免疫力 #健康科普破圈计划 #抖出健康知识宝藏 #营养斯", "duration_sec": 321, "views": 126588.0, "likes": 974.0, "comments": 17.0, "shares": 440.0, "favorites": 262.0, "danmaku": 0, "completion_rate": 0.678, "completion_rate_5s": 26.3083, "bounce_rate_2s": 41.5646, "avg_view_sec": 10.9182, "cover_click_rate": 23.5058, "new_fans": 128.0, "lost_fans": 2.0, "homepage_visits": 543.0, "topics": ["健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-10"}, {"id": "7555318553063345448", "publish_date": "2025-09-29 16:20", "desc": "别以胖瘦论营养，看看你有没有营养不良，众多营养素该如何补充？ #营养不良#健康科普破圈计划 #抖出健康知识宝藏 #营养科", "duration_sec": 337, "views": 89648.0, "likes": 848.0, "comments": 27.0, "shares": 275.0, "favorites": 326.0, "danmaku": 0, "completion_rate": 1.2977, "completion_rate_5s": 29.4091, "bounce_rate_2s": 43.8074, "avg_view_sec": 19.5197, "cover_click_rate": 21.899, "new_fans": 66.0, "lost_fans": 1.0, "homepage_visits": 244.0, "topics": ["健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-09"}, {"id": "7549109971028397375", "publish_date": "2025-09-12 16:02", "desc": "这条视频分享给身边患多囊而焦虑的姐妹们，得了多囊不可怕 积极的生活干预，是治疗多囊的好方法。#多囊 #饮食管理 #减肥 #健康科普不基础 #抖出健康知识宝藏", "duration_sec": 206, "views": 125347.0, "likes": 2383.0, "comments": 224.0, "shares": 1549.0, "favorites": 1234.0, "danmaku": 0, "completion_rate": 2.0582, "completion_rate_5s": 38.3846, "bounce_rate_2s": 41.5227, "avg_view_sec": 18.012, "cover_click_rate": 3.1032, "new_fans": 228.0, "lost_fans": 4.0, "homepage_visits": 753.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-09"}, {"id": "7545783179865525545", "publish_date": "2025-09-03 19:20", "desc": "非酒精性脂肪肝，牢记这5点！完全可以逆转。 日常饮食只要做一点点改变，生活状态就能变好很多。#脂肪肝 #肥胖 #健康科普不基础 #dou出健康知识宝藏", "duration_sec": 260, "views": 199271.0, "likes": 5252.0, "comments": 99.0, "shares": 1378.0, "favorites": 2555.0, "danmaku": 2.0, "completion_rate": 2.7557, "completion_rate_5s": 35.9287, "bounce_rate_2s": 41.815, "avg_view_sec": 30.1061, "cover_click_rate": 5.1342, "new_fans": 1082.0, "lost_fans": 2.0, "homepage_visits": 1075.0, "topics": [], "month": "2025-09"}, {"id": "7538741033480228147", "publish_date": "2025-08-15 19:26", "desc": "餐后便秘难、血糖飙？一个视频讲清楚膳食纤维！！！ #一口气讲透健康知识点 #膳食纤维 #抖出健康知识宝藏  #营养健康", "duration_sec": 328, "views": 14627.0, "likes": 172.0, "comments": 9.0, "shares": 65.0, "favorites": 117.0, "danmaku": 0, "completion_rate": 3.0916, "completion_rate_5s": 43.8738, "bounce_rate_2s": 25.6811, "avg_view_sec": 33.4331, "cover_click_rate": 14.3813, "new_fans": 20.0, "lost_fans": 0, "homepage_visits": 117.0, "topics": ["抖出健康知识宝藏"], "month": "2025-08"}, {"id": "7534990886230822201", "publish_date": "2025-08-05 18:05", "desc": "快告诉减肥的她，今晚早点休息吧\n#减肥 #医学科普 #熬夜 #大数据推荐给有需要的人 #抖出健康知识宝藏", "duration_sec": 39, "views": 5407.0, "likes": 52.0, "comments": 6.0, "shares": 49.0, "favorites": 13.0, "danmaku": 0, "completion_rate": 4.6113, "completion_rate_5s": 50.4299, "bounce_rate_2s": 29.6409, "avg_view_sec": 8.3053, "cover_click_rate": null, "new_fans": 2.0, "lost_fans": 0, "homepage_visits": 45.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-08"}, {"id": "7529839114372353332", "publish_date": "2025-07-22 20:20", "desc": "别滑走，做个专业帅气的自我介绍。 2008年我进入南通大学医学院临床医学学习，2018年于浙江大学医学院内科学硕士毕业，现在我是浙江大学附属浙江医院营养科的副主任医师。\n雄关漫道，一路走来，从解剖室的初学到临床一线的实践，始终记得那份对生命", "duration_sec": 31, "views": 57008.0, "likes": 336.0, "comments": 28.0, "shares": 23.0, "favorites": 70.0, "danmaku": 0, "completion_rate": 4.821, "completion_rate_5s": 36.787, "bounce_rate_2s": 30.9817, "avg_view_sec": 7.3819, "cover_click_rate": null, "new_fans": 377.0, "lost_fans": 4.0, "homepage_visits": 1163.0, "topics": [], "month": "2025-07"}, {"id": "7529770151093882169", "publish_date": "2025-07-22 13:13", "desc": "减重期间能吃果蔬冻干吗？两种技术的果蔬冻干怎么选？\n#减肥 #医学科普 #涨知识 #抖出健康知识宝藏 #健康科普有真知", "duration_sec": 68, "views": 5140.0, "likes": 37.0, "comments": 5.0, "shares": 6.0, "favorites": 7.0, "danmaku": 0, "completion_rate": 3.8054, "completion_rate_5s": 36.0643, "bounce_rate_2s": 34.7626, "avg_view_sec": 10.84, "cover_click_rate": null, "new_fans": 7.0, "lost_fans": 1.0, "homepage_visits": 26.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7527973583864302899", "publish_date": "2025-07-17 19:20", "desc": "6种减轻身体炎症的食物，你都吃过哪些？ #抗炎饮食 #减肥 #饮食健康 #抖出健康知识宝藏 #赶走身体小火苗", "duration_sec": 26, "views": 2435.0, "likes": 27.0, "comments": 3.0, "shares": 10.0, "favorites": 4.0, "danmaku": 0, "completion_rate": 6.1057, "completion_rate_5s": 41.5753, "bounce_rate_2s": 41.6438, "avg_view_sec": 8.3993, "cover_click_rate": null, "new_fans": 3.0, "lost_fans": 0, "homepage_visits": 3.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7526866599576472883", "publish_date": "2025-07-14 19:30", "desc": "选择你心中便秘的王者食物，哪一个是真正的一泻千里？ #便秘小妙招  #通便 #减肥 #抖出健康知识宝藏 #健康科普有真知", "duration_sec": 22, "views": 4099.0, "likes": 38.0, "comments": 3.0, "shares": 17.0, "favorites": 15.0, "danmaku": 0, "completion_rate": 6.9862, "completion_rate_5s": 40.068, "bounce_rate_2s": 38.5851, "avg_view_sec": 7.0856, "cover_click_rate": null, "new_fans": 0, "lost_fans": 0, "homepage_visits": 14.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7525336590013467943", "publish_date": "2025-07-11 16:20", "desc": "女生如何在暑假快速减肥成功，这个方法一定要用起来！ #女生必看 #减肥 #暑假减肥计划#转给你最爱的人  #抖出健康知识宝藏", "duration_sec": 23, "views": 2577.0, "likes": 22.0, "comments": 4.0, "shares": 10.0, "favorites": 2.0, "danmaku": 0, "completion_rate": 9.2031, "completion_rate_5s": 32.7128, "bounce_rate_2s": 39.6809, "avg_view_sec": 6.3771, "cover_click_rate": null, "new_fans": 3.0, "lost_fans": 0, "homepage_visits": 16.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7525619136207080714", "publish_date": "2025-07-11 11:25", "desc": "大姨妈波涛汹涌，不要只会吃红枣啦？ 女性面对不同的问题，要有不同的解决方法。#减肥 #女性健康 #女性营养 #医学知识科普 #抖出健康知识宝藏", "duration_sec": 77, "views": 2258.0, "likes": 12.0, "comments": 0, "shares": 8.0, "favorites": 7.0, "danmaku": 0, "completion_rate": 2.1948, "completion_rate_5s": 27.8244, "bounce_rate_2s": 41.8334, "avg_view_sec": 8.5991, "cover_click_rate": null, "new_fans": 1.0, "lost_fans": 0, "homepage_visits": 3.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7524228705523158313", "publish_date": "2025-07-07 18:05", "desc": "营养医生眼中的黑巧克力，减肥期间能不能吃呢？ #减肥 #医学科普 #抖出健康知识宝藏 #黑巧克力 #做自己体重的主理人", "duration_sec": 49, "views": 113536.0, "likes": 691.0, "comments": 182.0, "shares": 289.0, "favorites": 159.0, "danmaku": 0, "completion_rate": 6.343, "completion_rate_5s": 45.5807, "bounce_rate_2s": 38.2886, "avg_view_sec": 11.6553, "cover_click_rate": null, "new_fans": 7.0, "lost_fans": 1.0, "homepage_visits": 157.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7522768263936314665", "publish_date": "2025-07-03 17:14", "desc": "左旋肉碱真的能帮助我们减肥吗？来看看你是不是踩过这个坑？ #减肥 #肥胖 #减肥小知识 #抖出健康知识宝藏 #营养斯", "duration_sec": 79, "views": 13919.0, "likes": 140.0, "comments": 8.0, "shares": 51.0, "favorites": 42.0, "danmaku": 0, "completion_rate": 2.7141, "completion_rate_5s": 46.2308, "bounce_rate_2s": 33.9939, "avg_view_sec": 12.741, "cover_click_rate": null, "new_fans": 1.0, "lost_fans": 0, "homepage_visits": 32.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}], "daily": {"date": "2026-08-04", "prev_date": "2026-08-03", "fans_delta": 0, "likes_delta": 100, "views_delta": null, "new_works": 0}};
+const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi", "fans": 41700, "fans_text": "4.17万", "total_likes_text": "50.75万", "follows": 41, "last_7d": {"views": 125100, "homepage_visits": 2237, "likes": null, "shares": 465, "comments": 88, "net_fans": null}, "snapshot_at": "2026-08-04 14:46:11"}, "fetched_at": "2026-08-04 14:46:11", "total": 36, "topics": ["抖出健康知识宝藏", "痘痘", "痤疮", "减肥", "祛痘", "健康科普破圈计划", "健康科普", "医学科普"], "works": [{"id": "7665932160284495131", "publish_date": "2026-07-24 17:30", "desc": "姨妈痘总来？内调思路帮你搞定。 #痘痘 #姨妈痘 #痤疮 #祛痘 #抖出健康知识宝藏", "duration_sec": 250, "views": 79066.0, "likes": 1506.0, "comments": 29.0, "shares": 190.0, "favorites": 416.0, "danmaku": 0, "completion_rate": 0.7596, "completion_rate_5s": 17.5657, "bounce_rate_2s": 49.9563, "avg_view_sec": 11.0753, "cover_click_rate": 100.0, "new_fans": 166.0, "lost_fans": 10.0, "homepage_visits": 479.0, "topics": ["痘痘", "痤疮", "祛痘", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7663447775216012578", "publish_date": "2026-07-17 19:19", "desc": "熬夜爆痘该怎么办，一条视频教你用底层逻辑破解痘痘难题 #痘痘 #熬夜 #长痘痘 #祛痘 #抖出健康知识宝藏 @抖音小助手", "duration_sec": 238, "views": 93054.0, "likes": 2525.0, "comments": 50.0, "shares": 135.0, "favorites": 597.0, "danmaku": 0, "completion_rate": 0.6733, "completion_rate_5s": 20.3884, "bounce_rate_2s": 50.454, "avg_view_sec": 8.5625, "cover_click_rate": 40.9607, "new_fans": 64.0, "lost_fans": 26.0, "homepage_visits": 521.0, "topics": ["痘痘", "祛痘", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7657854396172160296", "publish_date": "2026-07-02 19:10", "desc": "运动爆痘收官战！文献认证的抗炎方案来啦！！！ #痘痘 #痤疮 #抗炎 #运动 #抖出健康知识宝藏", "duration_sec": 212, "views": 1246432.0, "likes": 58029.0, "comments": 306.0, "shares": 6499.0, "favorites": 31043.0, "danmaku": 9.0, "completion_rate": 0.6346, "completion_rate_5s": 36.1784, "bounce_rate_2s": 31.7783, "avg_view_sec": 11.0957, "cover_click_rate": 100.0, "new_fans": 9305.0, "lost_fans": 151.0, "homepage_visits": 44950.0, "topics": ["痘痘", "痤疮", "抖出健康知识宝藏"], "month": "2026-07"}, {"id": "7655238693359226154", "publish_date": "2026-06-25 18:00", "desc": "千万别乱挤下颌痘！小痘痘容易变成硬瘢痕疙瘩！！！ #痘痘 #瘢痕疙瘩  #曲尼司特 #痘肌饮食 #抖出健康知识宝藏", "duration_sec": 271, "views": 610225.0, "likes": 15296.0, "comments": 474.0, "shares": 3625.0, "favorites": 6692.0, "danmaku": 3.0, "completion_rate": 0.7718, "completion_rate_5s": 44.013, "bounce_rate_2s": 34.6892, "avg_view_sec": 16.6572, "cover_click_rate": 100.0, "new_fans": 1297.0, "lost_fans": 40.0, "homepage_visits": 8097.0, "topics": ["痘痘", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7652675629367840019", "publish_date": "2026-06-18 18:25", "desc": "运动本身到底对痘痘有什么影响，一条视频带你看懂 #痤疮 #痘痘 #长痘的原因 #运动 #抖出健康知识宝藏", "duration_sec": 289, "views": 563504.0, "likes": 23240.0, "comments": 215.0, "shares": 2324.0, "favorites": 7697.0, "danmaku": 0, "completion_rate": 0.7265, "completion_rate_5s": 43.103, "bounce_rate_2s": 33.7539, "avg_view_sec": 18.9139, "cover_click_rate": 100.0, "new_fans": 1982.0, "lost_fans": 38.0, "homepage_visits": 11291.0, "topics": ["痤疮", "痘痘", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7650072903425314088", "publish_date": "2026-06-11 18:05", "desc": "运动爆痘三部曲第一期，一条视频搞懂蛋白粉跟痤疮的关系 #痤疮 #爆痘 #健身 #健身长痘 #抖出健康知识宝藏", "duration_sec": 301, "views": 141947.0, "likes": 4397.0, "comments": 90.0, "shares": 667.0, "favorites": 1514.0, "danmaku": 0, "completion_rate": 0.6488, "completion_rate_5s": 38.5846, "bounce_rate_2s": 40.7179, "avg_view_sec": 19.1305, "cover_click_rate": 100.0, "new_fans": 448.0, "lost_fans": 10.0, "homepage_visits": 2439.0, "topics": ["痤疮", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7647458050189610286", "publish_date": "2026-06-04 18:45", "desc": "你喝牛奶长痘吗？斯主任一条视频帮你揭开牛奶长痘的真相。 #痘痘 #痤疮 #长痘的原因 #健身长痘 #抖出健康知识宝藏", "duration_sec": 231, "views": 134287.0, "likes": 3255.0, "comments": 70.0, "shares": 568.0, "favorites": 587.0, "danmaku": 0, "completion_rate": 1.0459, "completion_rate_5s": 28.7714, "bounce_rate_2s": 43.4168, "avg_view_sec": 15.1595, "cover_click_rate": 69.5175, "new_fans": 295.0, "lost_fans": 11.0, "homepage_visits": 1005.0, "topics": ["痘痘", "痤疮", "抖出健康知识宝藏"], "month": "2026-06"}, {"id": "7641906493566094644", "publish_date": "2026-05-20 17:55", "desc": "吃对这4个防晒营养素，也能让你的皮肤自带 防晒buff #防晒 #护肤 #美白 #营养健康 #抖出健康知识宝藏", "duration_sec": 222, "views": 80167.0, "likes": 1036.0, "comments": 10.0, "shares": 213.0, "favorites": 442.0, "danmaku": 0, "completion_rate": 1.2923, "completion_rate_5s": 31.5414, "bounce_rate_2s": 46.7103, "avg_view_sec": 13.0688, "cover_click_rate": 27.0449, "new_fans": 141.0, "lost_fans": 4.0, "homepage_visits": 405.0, "topics": ["抖出健康知识宝藏"], "month": "2026-05"}, {"id": "7637457724694859044", "publish_date": "2026-05-08 18:11", "desc": "重度痤疮，真的只能硬抗异维A酸吗？ #痤疮 #痘痘反复 #祛痘 #抖出健康知识宝藏 #曲尼司特", "duration_sec": 244, "views": 220853.0, "likes": 5897.0, "comments": 130.0, "shares": 575.0, "favorites": 1601.0, "danmaku": 0, "completion_rate": 0.9982, "completion_rate_5s": 34.8554, "bounce_rate_2s": 43.1368, "avg_view_sec": 16.1564, "cover_click_rate": 74.8785, "new_fans": 214.0, "lost_fans": 18.0, "homepage_visits": 2161.0, "topics": ["痤疮", "祛痘", "抖出健康知识宝藏"], "month": "2026-05"}, {"id": "7628173994507734310", "publish_date": "2026-04-13 17:41", "desc": "5分钟讲透“肠皮轴”：从医学底层逻辑彻底终结反复爆痘。 #痘痘 #祛痘 #肠道健康 #健康科普 #抖出健康知识宝藏", "duration_sec": 256, "views": 275095.0, "likes": 7585.0, "comments": 97.0, "shares": 1648.0, "favorites": 3315.0, "danmaku": 1.0, "completion_rate": 1.209, "completion_rate_5s": 34.3569, "bounce_rate_2s": 44.7244, "avg_view_sec": 16.6053, "cover_click_rate": 23.4997, "new_fans": 483.0, "lost_fans": 22.0, "homepage_visits": 2593.0, "topics": ["痘痘", "祛痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-04"}, {"id": "7627009288266943771", "publish_date": "2026-04-10 18:30", "desc": "今年必看的5分钟祛痘科普，2026最新研究全拆解！！！ #痘痘  #祛痘 #肠道健康 #健康科普 #抖出健康知识宝藏", "duration_sec": 317, "views": 1223261.0, "likes": 48509.0, "comments": 728.0, "shares": 10365.0, "favorites": 30220.0, "danmaku": 9.0, "completion_rate": 2.0109, "completion_rate_5s": 37.9796, "bounce_rate_2s": 29.1758, "avg_view_sec": 23.8607, "cover_click_rate": 11.281, "new_fans": 3152.0, "lost_fans": 85.0, "homepage_visits": 21524.0, "topics": ["痘痘", "祛痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-04"}, {"id": "7620341573468966196", "publish_date": "2026-03-23 18:00", "desc": "祛痘不去根，消了也复发 #痤疮 #痘痘反复 #痘印 #抖出健康知识宝藏 #健康科普破圈计划", "duration_sec": 230, "views": 684521.0, "likes": 19781.0, "comments": 277.0, "shares": 3403.0, "favorites": 9106.0, "danmaku": 3.0, "completion_rate": 1.0304, "completion_rate_5s": 38.2465, "bounce_rate_2s": 37.6719, "avg_view_sec": 16.7914, "cover_click_rate": 10.2665, "new_fans": 975.0, "lost_fans": 50.0, "homepage_visits": 9868.0, "topics": ["痤疮", "抖出健康知识宝藏", "健康科普破圈计划"], "month": "2026-03"}, {"id": "7603637389839420723", "publish_date": "2026-02-14 20:20", "desc": "回家过年不爆痘，饮食营养是基础 #痤疮痘痘 #抖音新春特别会 #欢笑中国年 #新年囤点专业货 #抖出健康知识宝藏", "duration_sec": 249, "views": 115132.0, "likes": 1665.0, "comments": 17.0, "shares": 170.0, "favorites": 292.0, "danmaku": 0, "completion_rate": 0.4781, "completion_rate_5s": 20.9466, "bounce_rate_2s": 56.788, "avg_view_sec": 8.5594, "cover_click_rate": 19.0851, "new_fans": 102.0, "lost_fans": 21.0, "homepage_visits": 686.0, "topics": ["抖出健康知识宝藏"], "month": "2026-02"}, {"id": "7600691584862096691", "publish_date": "2026-01-29 20:20", "desc": "26年解锁适合你的【抗炎】新宠——茶！ #茶多酚 #变瘦变美 #抖出健康知识宝藏 #油痘肌 #绿茶", "duration_sec": 270, "views": 758858.0, "likes": 20500.0, "comments": 503.0, "shares": 4528.0, "favorites": 6509.0, "danmaku": 2.0, "completion_rate": 0.7919, "completion_rate_5s": 36.2956, "bounce_rate_2s": 35.8339, "avg_view_sec": 15.4771, "cover_click_rate": 9.231, "new_fans": 1495.0, "lost_fans": 47.0, "homepage_visits": 7899.0, "topics": ["抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7595889840747466003", "publish_date": "2026-01-16 20:20", "desc": "油也会致痘吗？这些糟糕的油脂，暗中助长了你脸上的痘痘 #痤疮 #拒绝坏油 #健康科普 #抖出健康知识宝藏", "duration_sec": 333, "views": 343566.0, "likes": 10007.0, "comments": 144.0, "shares": 2252.0, "favorites": 4302.0, "danmaku": 3.0, "completion_rate": 1.037, "completion_rate_5s": 41.7562, "bounce_rate_2s": 33.7134, "avg_view_sec": 20.127, "cover_click_rate": 16.1971, "new_fans": 1242.0, "lost_fans": 28.0, "homepage_visits": 4577.0, "topics": ["痤疮", "健康科普", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7592168919549381938", "publish_date": "2026-01-07 20:20", "desc": "外卖、奶茶、熬夜：当代年轻人的 “痤疮铁三角” #痤疮 #痘痘 #健康科普 #抖出健康知识宝藏", "duration_sec": 0, "views": 54980.0, "likes": 1072.0, "comments": 49.0, "shares": 295.0, "favorites": 589.0, "danmaku": 0, "completion_rate": 0.0, "completion_rate_5s": null, "bounce_rate_2s": 49.973, "avg_view_sec": null, "cover_click_rate": 100.0, "new_fans": 102.0, "lost_fans": 10.0, "homepage_visits": 1107.0, "topics": ["痤疮", "痘痘", "健康科普", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7591420923136331051", "publish_date": "2026-01-04 20:20", "desc": "4种营养素，痘肌人要怎么吃，才能改善痤疮反复发作 #痤疮 #痘痘 #变瘦变美 #抖出健康知识宝藏 #我的年度健康盘点", "duration_sec": 444, "views": 2798571.0, "likes": 91955.0, "comments": 1193.0, "shares": 24074.0, "favorites": 59772.0, "danmaku": 21.0, "completion_rate": 1.7841, "completion_rate_5s": 37.6177, "bounce_rate_2s": 33.0588, "avg_view_sec": 22.1881, "cover_click_rate": 8.5066, "new_fans": 8903.0, "lost_fans": 174.0, "homepage_visits": 32931.0, "topics": ["痤疮", "痘痘", "抖出健康知识宝藏"], "month": "2026-01"}, {"id": "7587358911729061135", "publish_date": "2025-12-24 20:00", "desc": "你有戒不掉的糖瘾吗？水果中的糖是健康糖吗？ 学会控制添加糖的摄入，你的脸蛋和身体才不会被糖“腐蚀”掉。#糖瘾 #变瘦变美 #我的年度健康盘点 #抖出健康知识宝藏 #胰岛素抵抗", "duration_sec": 328, "views": 180213.0, "likes": 2916.0, "comments": 141.0, "shares": 2441.0, "favorites": 1143.0, "danmaku": 4.0, "completion_rate": 2.2251, "completion_rate_5s": 41.0028, "bounce_rate_2s": 31.5434, "avg_view_sec": 25.1429, "cover_click_rate": 12.1681, "new_fans": 335.0, "lost_fans": 11.0, "homepage_visits": 1134.0, "topics": ["抖出健康知识宝藏"], "month": "2025-12"}, {"id": "7584761933237210418", "publish_date": "2025-12-17 17:50", "desc": "低门槛抗炎饮食，你也能吃出好气色！ #如何养好自己的气色 你知道膳食炎症指数DII吗？这是南卡罗来纳大学开发的饮食炎症评分系统（DII），今天我要跟大家科普这个 “藏在饮食里的气色密码”。\n可能很多朋友没听过，但DII的核心逻辑特别好懂：它", "duration_sec": 320, "views": 265353.0, "likes": 7144.0, "comments": 83.0, "shares": 1289.0, "favorites": 2444.0, "danmaku": 7.0, "completion_rate": 2.3927, "completion_rate_5s": 30.8809, "bounce_rate_2s": 35.7477, "avg_view_sec": 24.9397, "cover_click_rate": 8.2034, "new_fans": 684.0, "lost_fans": 21.0, "homepage_visits": 1946.0, "topics": [], "month": "2025-12"}, {"id": "7582530282645916980", "publish_date": "2025-12-11 20:20", "desc": "你的肠道藏着调节免疫力的关键！ 人体约70%~80%的免疫细胞都集中在肠道中，这条视频跟你讲清楚肠道与免疫力的关系。#免疫力 #肠道健康 #我的年度健康盘点 #抖出健康知识宝藏#医学科普", "duration_sec": 331, "views": 101263.0, "likes": 925.0, "comments": 34.0, "shares": 728.0, "favorites": 638.0, "danmaku": 8.0, "completion_rate": 1.5702, "completion_rate_5s": 24.6458, "bounce_rate_2s": 38.4646, "avg_view_sec": 22.6927, "cover_click_rate": 10.147, "new_fans": 189.0, "lost_fans": 10.0, "homepage_visits": 464.0, "topics": ["抖出健康知识宝藏", "医学科普"], "month": "2025-12"}, {"id": "7576881615641562403", "publish_date": "2025-11-26 16:30", "desc": "为什么你会反复长痘，今天4条原因，帮你全面分析痘痘 #痘痘 #痤疮 #科普  #健康科普破圈计划 #抖出健康知识宝藏", "duration_sec": 398, "views": 1286919.0, "likes": 47703.0, "comments": 1200.0, "shares": 9736.0, "favorites": 22322.0, "danmaku": 238.0, "completion_rate": 1.126, "completion_rate_5s": 34.8859, "bounce_rate_2s": 40.6055, "avg_view_sec": 25.3807, "cover_click_rate": 11.2327, "new_fans": 4759.0, "lost_fans": 112.0, "homepage_visits": 35737.0, "topics": ["痘痘", "痤疮", "健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-11"}, {"id": "7572128464099118379", "publish_date": "2025-11-13 16:45", "desc": "痤疮痘痘的本质就是油多了、堵住了、菌多了、出现炎症了 治好痘痘后想要避免复发，管住嘴是关键，营养斯教你从饮食和生活上下手 #痘痘 #痤疮 #科学变美#健康科普破圈计划 #抖出健康知识宝藏", "duration_sec": 241, "views": 3181906.0, "likes": 118277.0, "comments": 3780.0, "shares": 30558.0, "favorites": 58512.0, "danmaku": 1298.0, "completion_rate": 1.7718, "completion_rate_5s": 39.8929, "bounce_rate_2s": 33.4751, "avg_view_sec": 17.8106, "cover_click_rate": 26.575, "new_fans": 6214.0, "lost_fans": 163.0, "homepage_visits": 39920.0, "topics": ["痘痘", "痤疮", "健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-11"}, {"id": "7561751410145103138", "publish_date": "2025-10-16 17:37", "desc": "精力差、怀疑免疫力背刺自己，那你可以试试关注维生素D！ 超全维生素D攻略它来了#维生素D #免疫力 #健康科普破圈计划 #抖出健康知识宝藏 #营养斯", "duration_sec": 321, "views": 126590.0, "likes": 974.0, "comments": 17.0, "shares": 440.0, "favorites": 262.0, "danmaku": 0, "completion_rate": 0.678, "completion_rate_5s": 26.3083, "bounce_rate_2s": 41.5646, "avg_view_sec": 10.9182, "cover_click_rate": 23.5058, "new_fans": 128.0, "lost_fans": 2.0, "homepage_visits": 543.0, "topics": ["健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-10"}, {"id": "7555318553063345448", "publish_date": "2025-09-29 16:20", "desc": "别以胖瘦论营养，看看你有没有营养不良，众多营养素该如何补充？ #营养不良#健康科普破圈计划 #抖出健康知识宝藏 #营养科", "duration_sec": 337, "views": 89662.0, "likes": 848.0, "comments": 27.0, "shares": 275.0, "favorites": 326.0, "danmaku": 0, "completion_rate": 1.2977, "completion_rate_5s": 29.4091, "bounce_rate_2s": 43.8074, "avg_view_sec": 19.5197, "cover_click_rate": 21.899, "new_fans": 66.0, "lost_fans": 1.0, "homepage_visits": 244.0, "topics": ["健康科普破圈计划", "抖出健康知识宝藏"], "month": "2025-09"}, {"id": "7549109971028397375", "publish_date": "2025-09-12 16:02", "desc": "这条视频分享给身边患多囊而焦虑的姐妹们，得了多囊不可怕 积极的生活干预，是治疗多囊的好方法。#多囊 #饮食管理 #减肥 #健康科普不基础 #抖出健康知识宝藏", "duration_sec": 206, "views": 125353.0, "likes": 2383.0, "comments": 224.0, "shares": 1549.0, "favorites": 1234.0, "danmaku": 0, "completion_rate": 2.0582, "completion_rate_5s": 38.3846, "bounce_rate_2s": 41.5227, "avg_view_sec": 18.012, "cover_click_rate": 3.1032, "new_fans": 228.0, "lost_fans": 4.0, "homepage_visits": 753.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-09"}, {"id": "7545783179865525545", "publish_date": "2025-09-03 19:20", "desc": "非酒精性脂肪肝，牢记这5点！完全可以逆转。 日常饮食只要做一点点改变，生活状态就能变好很多。#脂肪肝 #肥胖 #健康科普不基础 #dou出健康知识宝藏", "duration_sec": 260, "views": 199271.0, "likes": 5252.0, "comments": 99.0, "shares": 1378.0, "favorites": 2555.0, "danmaku": 2.0, "completion_rate": 2.7557, "completion_rate_5s": 35.9287, "bounce_rate_2s": 41.815, "avg_view_sec": 30.1061, "cover_click_rate": 5.1342, "new_fans": 1082.0, "lost_fans": 2.0, "homepage_visits": 1075.0, "topics": [], "month": "2025-09"}, {"id": "7538741033480228147", "publish_date": "2025-08-15 19:26", "desc": "餐后便秘难、血糖飙？一个视频讲清楚膳食纤维！！！ #一口气讲透健康知识点 #膳食纤维 #抖出健康知识宝藏  #营养健康", "duration_sec": 328, "views": 14627.0, "likes": 172.0, "comments": 9.0, "shares": 65.0, "favorites": 117.0, "danmaku": 0, "completion_rate": 3.0916, "completion_rate_5s": 43.8738, "bounce_rate_2s": 25.6811, "avg_view_sec": 33.4331, "cover_click_rate": 14.3813, "new_fans": 20.0, "lost_fans": 0, "homepage_visits": 117.0, "topics": ["抖出健康知识宝藏"], "month": "2025-08"}, {"id": "7534990886230822201", "publish_date": "2025-08-05 18:05", "desc": "快告诉减肥的她，今晚早点休息吧\n#减肥 #医学科普 #熬夜 #大数据推荐给有需要的人 #抖出健康知识宝藏", "duration_sec": 39, "views": 5407.0, "likes": 52.0, "comments": 6.0, "shares": 49.0, "favorites": 13.0, "danmaku": 0, "completion_rate": 4.6113, "completion_rate_5s": 50.4299, "bounce_rate_2s": 29.6409, "avg_view_sec": 8.3053, "cover_click_rate": null, "new_fans": 2.0, "lost_fans": 0, "homepage_visits": 45.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-08"}, {"id": "7529839114372353332", "publish_date": "2025-07-22 20:20", "desc": "别滑走，做个专业帅气的自我介绍。 2008年我进入南通大学医学院临床医学学习，2018年于浙江大学医学院内科学硕士毕业，现在我是浙江大学附属浙江医院营养科的副主任医师。\n雄关漫道，一路走来，从解剖室的初学到临床一线的实践，始终记得那份对生命", "duration_sec": 31, "views": 57008.0, "likes": 336.0, "comments": 28.0, "shares": 23.0, "favorites": 70.0, "danmaku": 0, "completion_rate": 4.821, "completion_rate_5s": 36.787, "bounce_rate_2s": 30.9817, "avg_view_sec": 7.3819, "cover_click_rate": null, "new_fans": 377.0, "lost_fans": 4.0, "homepage_visits": 1163.0, "topics": [], "month": "2025-07"}, {"id": "7529770151093882169", "publish_date": "2025-07-22 13:13", "desc": "减重期间能吃果蔬冻干吗？两种技术的果蔬冻干怎么选？\n#减肥 #医学科普 #涨知识 #抖出健康知识宝藏 #健康科普有真知", "duration_sec": 68, "views": 5140.0, "likes": 37.0, "comments": 5.0, "shares": 6.0, "favorites": 7.0, "danmaku": 0, "completion_rate": 3.8054, "completion_rate_5s": 36.0643, "bounce_rate_2s": 34.7626, "avg_view_sec": 10.84, "cover_click_rate": null, "new_fans": 7.0, "lost_fans": 1.0, "homepage_visits": 26.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7527973583864302899", "publish_date": "2025-07-17 19:20", "desc": "6种减轻身体炎症的食物，你都吃过哪些？ #抗炎饮食 #减肥 #饮食健康 #抖出健康知识宝藏 #赶走身体小火苗", "duration_sec": 26, "views": 2435.0, "likes": 27.0, "comments": 3.0, "shares": 10.0, "favorites": 4.0, "danmaku": 0, "completion_rate": 6.1057, "completion_rate_5s": 41.5753, "bounce_rate_2s": 41.6438, "avg_view_sec": 8.3993, "cover_click_rate": null, "new_fans": 3.0, "lost_fans": 0, "homepage_visits": 3.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7526866599576472883", "publish_date": "2025-07-14 19:30", "desc": "选择你心中便秘的王者食物，哪一个是真正的一泻千里？ #便秘小妙招  #通便 #减肥 #抖出健康知识宝藏 #健康科普有真知", "duration_sec": 22, "views": 4099.0, "likes": 38.0, "comments": 3.0, "shares": 17.0, "favorites": 15.0, "danmaku": 0, "completion_rate": 6.9862, "completion_rate_5s": 40.068, "bounce_rate_2s": 38.5851, "avg_view_sec": 7.0856, "cover_click_rate": null, "new_fans": 0, "lost_fans": 0, "homepage_visits": 14.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7525336590013467943", "publish_date": "2025-07-11 16:20", "desc": "女生如何在暑假快速减肥成功，这个方法一定要用起来！ #女生必看 #减肥 #暑假减肥计划#转给你最爱的人  #抖出健康知识宝藏", "duration_sec": 23, "views": 2577.0, "likes": 22.0, "comments": 4.0, "shares": 10.0, "favorites": 2.0, "danmaku": 0, "completion_rate": 9.2031, "completion_rate_5s": 32.7128, "bounce_rate_2s": 39.6809, "avg_view_sec": 6.3771, "cover_click_rate": null, "new_fans": 3.0, "lost_fans": 0, "homepage_visits": 16.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7525619136207080714", "publish_date": "2025-07-11 11:25", "desc": "大姨妈波涛汹涌，不要只会吃红枣啦？ 女性面对不同的问题，要有不同的解决方法。#减肥 #女性健康 #女性营养 #医学知识科普 #抖出健康知识宝藏", "duration_sec": 77, "views": 2258.0, "likes": 12.0, "comments": 0, "shares": 8.0, "favorites": 7.0, "danmaku": 0, "completion_rate": 2.1948, "completion_rate_5s": 27.8244, "bounce_rate_2s": 41.8334, "avg_view_sec": 8.5991, "cover_click_rate": null, "new_fans": 1.0, "lost_fans": 0, "homepage_visits": 3.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7524228705523158313", "publish_date": "2025-07-07 18:05", "desc": "营养医生眼中的黑巧克力，减肥期间能不能吃呢？ #减肥 #医学科普 #抖出健康知识宝藏 #黑巧克力 #做自己体重的主理人", "duration_sec": 49, "views": 113551.0, "likes": 692.0, "comments": 182.0, "shares": 289.0, "favorites": 160.0, "danmaku": 0, "completion_rate": 6.343, "completion_rate_5s": 45.5807, "bounce_rate_2s": 38.2886, "avg_view_sec": 11.6553, "cover_click_rate": null, "new_fans": 7.0, "lost_fans": 1.0, "homepage_visits": 157.0, "topics": ["减肥", "医学科普", "抖出健康知识宝藏"], "month": "2025-07"}, {"id": "7522768263936314665", "publish_date": "2025-07-03 17:14", "desc": "左旋肉碱真的能帮助我们减肥吗？来看看你是不是踩过这个坑？ #减肥 #肥胖 #减肥小知识 #抖出健康知识宝藏 #营养斯", "duration_sec": 79, "views": 13921.0, "likes": 140.0, "comments": 8.0, "shares": 51.0, "favorites": 42.0, "danmaku": 0, "completion_rate": 2.7141, "completion_rate_5s": 46.2308, "bounce_rate_2s": 33.9939, "avg_view_sec": 12.741, "cover_click_rate": null, "new_fans": 1.0, "lost_fans": 0, "homepage_visits": 32.0, "topics": ["减肥", "抖出健康知识宝藏"], "month": "2025-07"}], "daily": {"date": "2026-08-04", "prev_date": "2026-08-03", "fans_delta": 0, "likes_delta": 100, "views_delta": null, "new_works": 0}};
 
-/* ======== 看板逻辑（Lupi 编辑语法 · Mono 灰阶） ======== */
+/* ======== 看板逻辑（「青囊 Clinical」世界） ======== */
 (function () {
   'use strict';
 
   const SVGNS = 'http://www.w3.org/2000/svg';
+
+  /* ---------- 手绘 SVG 图标体系（统一 2px 描边 · 圆角笔帽） ---------- */
+  const IC_PATHS = {
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/>',
+    comment: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+    activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>',
+    trending: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    rows: '<path d="M3 5h18M3 10h18M3 15h18M3 20h18"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+  };
+  function ic(name, size) {
+    const p = IC_PATHS[name] || '';
+    return '<svg width="' + (size || 12) + '" height="' + (size || 12) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  }
+  function arrow(dir, size) {
+    const d = dir === 'up' ? 'M4 1.2 7.6 7H0.4Z' : 'M4 6.8 0.4 1h7.2Z';
+    return '<svg width="' + (size || 8) + '" height="' + (size || 8) + '" viewBox="0 0 8 8" aria-hidden="true"><path d="' + d + '" fill="currentColor"/></svg>';
+  }
+  function mountStaticIcons() {
+    document.querySelectorAll('[data-ic]').forEach(el2 => { el2.innerHTML = ic(el2.getAttribute('data-ic'), 13); });
+  }
+
   const METRICS = [
     { key: 'views', label: '播放量', fmt: fmtWan },
     { key: 'new_fans', label: '涨粉', fmt: fmtInt },
@@ -419,7 +456,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
   function $(sel) { return document.querySelector('[data-field="' + sel + '"]'); }
   function shortName(w) {
-    const t = String(w.desc || '').split('#')[0].replace(/@\\S+/g, '').trim();
+    const t = String(w.desc || '').split('#')[0].replace(/@\S+/g, '').trim();
     return (t || '未命名作品').slice(0, 11);
   }
   function filteredWorks() {
@@ -427,7 +464,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     return state.topic === '全部' ? ws : ws.filter(w => (w.topics || []).includes(state.topic));
   }
 
-  /* ---------- MONO SVG helpers（el/txt/rnd，对应 mono-tokens） ---------- */
+  /* ---------- SVG helpers ---------- */
   function el(s, tag, attrs) { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); s.appendChild(n); return n; }
   function txt(s, attrs, t) { const n = el(s, 'text', attrs); n.textContent = t; return n; }
   function rnd(i, k) { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); }
@@ -446,50 +483,106 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     cards.forEach(c => io.observe(c));
   }
 
+  /* ---------- 自定义 tooltip ---------- */
+  function getTip(card) {
+    let tip = card.querySelector('.chart-tip');
+    if (!tip) { tip = document.createElement('div'); tip.className = 'chart-tip'; card.appendChild(tip); }
+    return tip;
+  }
+  function showTip(card, node, html) {
+    const tip = getTip(card);
+    tip.innerHTML = html;
+    tip.classList.add('on');
+    const cr = card.getBoundingClientRect();
+    const nr = node.getBoundingClientRect();
+    let x = nr.left - cr.left + nr.width / 2 - tip.offsetWidth / 2;
+    let y = nr.top - cr.top - tip.offsetHeight - 10;
+    x = Math.max(6, Math.min(cr.width - tip.offsetWidth - 6, x));
+    if (y < 4) y = nr.bottom - cr.top + 10;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hideTip(card) { const tip = card.querySelector('.chart-tip'); if (tip) tip.classList.remove('on'); }
+
+  /* ---------- 图 ↔ 表 双向联动（brushing & linking） ---------- */
+  function linkToTable(id) {
+    const row = document.querySelector('tr[data-wid="' + id + '"]');
+    if (!row) return;
+    row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    row.classList.remove('row-flash');
+    void row.offsetWidth;
+    row.classList.add('row-flash');
+    setTimeout(() => row.classList.remove('row-flash'), 3000);
+  }
+  function linkToChart(id) {
+    const g = document.querySelector('#barcode g.hit[data-wid="' + id + '"]');
+    if (!g) return;
+    g.closest('svg').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    g.classList.remove('dot-pulse');
+    setTimeout(() => { void g.getBoundingClientRect(); g.classList.add('dot-pulse'); }, 350);
+    setTimeout(() => g.classList.remove('dot-pulse'), 2200);
+  }
+  function bindHit(g, card, w, metricLabel, metricText) {
+    g.addEventListener('mouseenter', () => showTip(card, g,
+      esc(shortName(w)) + '\n<span class="t-metric">' + esc(metricLabel) + ' ' + esc(metricText) + '</span> · ' + esc(w.publish_date)));
+    g.addEventListener('mouseleave', () => hideTip(card));
+    g.addEventListener('click', () => linkToTable(w.id));
+  }
+
   /* ---------- 渲染：GLANCE 大数字带 ---------- */
   function renderKpi(d) {
     const a = d.account || {};
     const l7 = a.last_7d || {};
-    document.querySelector('[data-field="fans"]').textContent = a.fans_text || fmtWan(a.fans);
     const nf = l7.net_fans;
-    const fd = document.querySelector('[data-field="fans-delta"]');
-    fd.textContent = nf != null ? (nf >= 0 ? '▲' : '▼') + ' 7日净增 ' + fmtSign(nf) : '';
-    document.querySelector('[data-field="d7-views"]').textContent = fmtWan(l7.views);
-    document.querySelector('[data-field="d7-likes"]').textContent = fmtWan(l7.likes);
-    document.querySelector('[data-field="d7-shares"]').textContent = fmtWan(l7.shares);
-    document.querySelector('[data-field="d7-comments"]').textContent = fmtWan(l7.comments);
-    document.querySelector('[data-field="total-likes"]').textContent = a.total_likes_text || '—';
+    const deltaHtml = nf != null
+      ? '<span class="' + (nf >= 0 ? 'arr-up' : 'arr-down') + '">' + arrow(nf >= 0 ? 'up' : 'down') + '</span> 7日净增 ' + fmtSign(nf)
+      : '';
+    const items = [
+      { icon: 'users', label: '粉丝 Fans', v: a.fans_text || fmtWan(a.fans), hero: true, delta: deltaHtml },
+      { icon: 'eye', label: '7日播放', v: fmtWan(l7.views) },
+      { icon: 'heart', label: '7日点赞', v: fmtWan(l7.likes) },
+      { icon: 'share', label: '7日分享', v: fmtWan(l7.shares) },
+      { icon: 'comment', label: '7日评论', v: fmtWan(l7.comments) },
+      { icon: 'zap', label: '累计获赞', v: a.total_likes_text || '—' },
+    ];
+    $('kpi-row').innerHTML = items.map(it =>
+      '<div class="kpi' + (it.hero ? ' kpi-hero' : '') + '">' +
+      '<span class="k-label"><span class="k-ic">' + ic(it.icon, 11) + '</span>' + esc(it.label) + '</span>' +
+      '<output>' + esc(it.v) + '</output>' +
+      (it.delta ? '<span class="k-delta">' + it.delta + '</span>' : '') +
+      '</div>').join('');
     if (a.name) document.querySelector('[data-field="title"]').textContent = a.name + ' · 医生自媒体工作台';
     if (a.douyin_id) document.querySelector('[data-field="subtitle"]').textContent = '抖音号 ' + a.douyin_id + ' · 仅统计审核通过的公开作品';
     $('kpi-src').textContent = 'ACCOUNT AT A GLANCE · 抖音创作者中心 · 更新于 ' + (d.fetched_at || '—');
   }
 
-  /* ---------- 渲染：今日战报（与上一快照对比） ---------- */
+  /* ---------- 渲染：今日战报 ---------- */
   function renderDaily(d) {
     const card = $('daily-card');
     const dl = d.daily;
     if (!dl || dl.prev_date == null) { card.style.display = 'none'; return; }
     const items = [
-      { label: '粉丝净增 Fans', v: dl.fans_delta, fmt: fmtSign, note: '当前 ' + (d.account && d.account.fans_text || '—') },
-      { label: '获赞增量 Likes', v: dl.likes_delta, fmt: fmtSign, note: '全作品累计口径' },
-      { label: '播放增量 Views', v: dl.views_delta, fmt: v => { if (Math.abs(v) >= 10000) { const w = v / 10000; return (v > 0 ? '+' : '') + (Math.abs(w) >= 100 ? Math.round(w) : Math.round(w * 10) / 10) + '万'; } return fmtSign(v); }, note: '全作品累计口径' },
-      { label: '新发布 New Posts', v: dl.new_works, fmt: fmtInt, note: '上一快照以来', plain: true },
+      { icon: 'users', label: '粉丝净增 Fans', v: dl.fans_delta, fmt: fmtSign, note: '当前 ' + (d.account && d.account.fans_text || '—') },
+      { icon: 'heart', label: '获赞增量 Likes', v: dl.likes_delta, fmt: fmtSign, note: '全作品累计口径' },
+      { icon: 'eye', label: '播放增量 Views', v: dl.views_delta, fmt: v => { if (Math.abs(v) >= 10000) { const w = v / 10000; return (v > 0 ? '+' : '') + (Math.abs(w) >= 100 ? Math.round(w) : Math.round(w * 10) / 10) + '万'; } return fmtSign(v); }, note: '全作品累计口径' },
+      { icon: 'plus', label: '新发布 New Posts', v: dl.new_works, fmt: fmtInt, note: '上一快照以来', plain: true },
     ];
     $('daily-row').innerHTML = items.map(it => {
+      const label = '<span class="d-label"><span class="d-ic">' + ic(it.icon, 11) + '</span>' + esc(it.label) + '</span>';
       if (it.v == null) {
-        return '<div class="d-item"><span class="d-label">' + esc(it.label) + '</span><output>—</output><span class="d-note">明日快照起可用</span></div>';
+        return '<div class="d-item">' + label + '<output>—</output><span class="d-note">明日快照起可用</span></div>';
       }
-      const neg = !it.plain && it.v < 0;
-      const arrow = it.plain ? '' : (it.v >= 0 ? '▲ ' : '▼ ');
-      return '<div class="d-item"><span class="d-label">' + esc(it.label) + '</span>' +
-        '<output class="' + (neg ? 'neg' : '') + '">' + arrow + esc(it.fmt(it.v)) + '</output>' +
+      const cls = it.plain ? '' : (it.v < 0 ? 'neg' : it.v > 0 ? 'pos' : '');
+      const arr = it.plain || it.v === 0 ? '' : '<span class="' + (it.v > 0 ? 'arr-up' : 'arr-down') + '" style="display:inline-flex;color:' + (it.v > 0 ? 'var(--accent)' : 'var(--amber)') + '">' + arrow(it.v > 0 ? 'up' : 'down') + '</span>';
+      return '<div class="d-item">' + label +
+        '<output class="' + cls + '">' + arr + esc(it.fmt(it.v)) + '</output>' +
         '<span class="d-note">' + esc(it.note) + '</span></div>';
     }).join('');
     $('daily-sub').textContent = '对比上一快照 ' + dl.prev_date + ' · 增量为两次抓取间的变化';
     card.style.display = '';
   }
 
-  /* ---------- 渲染：本周战报（近7天 vs 前7天，每周日更新） ---------- */
+  /* ---------- 渲染：本周战报 ---------- */
   function renderWeekly(d) {
     const card = $('weekly-card');
     const wk = d.weekly;
@@ -501,17 +594,17 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       return p == null ? '前7天无基数' : (p >= 0 ? '▲ +' : '▼ ') + p + '% vs 前7天';
     };
     const items = [
-      { label: '新作品 Posts', v: fmtInt(tw.count), note: '前7天 ' + fmtInt(pw.count) + ' 个' },
-      { label: '播放 Views', v: fmtWan(tw.views), note: pctNote(tw.views, pw.views) },
-      { label: '涨粉 Fans', v: fmtSign(tw.new_fans), note: pctNote(tw.new_fans, pw.new_fans) },
-      { label: '互动 Engagement', v: fmtWan(tw.engagement), note: pctNote(tw.engagement, pw.engagement) },
+      { icon: 'plus', label: '新作品 Posts', v: fmtInt(tw.count), note: '前7天 ' + fmtInt(pw.count) + ' 个' },
+      { icon: 'eye', label: '播放 Views', v: fmtWan(tw.views), note: pctNote(tw.views, pw.views) },
+      { icon: 'users', label: '涨粉 Fans', v: fmtSign(tw.new_fans), note: pctNote(tw.new_fans, pw.new_fans) },
+      { icon: 'zap', label: '互动 Engagement', v: fmtWan(tw.engagement), note: pctNote(tw.engagement, pw.engagement) },
     ];
     $('weekly-row').innerHTML = items.map(it =>
-      '<div class="d-item"><span class="d-label">' + esc(it.label) + '</span>' +
+      '<div class="d-item"><span class="d-label"><span class="d-ic">' + ic(it.icon, 11) + '</span>' + esc(it.label) + '</span>' +
       '<output>' + esc(it.v) + '</output>' +
       '<span class="d-note">' + esc(it.note) + '</span></div>').join('');
     const vp = pct(tw.views, pw.views);
-    $('weekly-title').textContent = '近7天播放 ' + fmtWan(tw.views) + (vp == null ? '' : ' · 较前7天 ' + (vp >= 0 ? '+' : '') + vp + '%');
+    document.querySelector('[data-field="weekly-title"]').textContent = '近7天播放 ' + fmtWan(tw.views) + (vp == null ? '' : ' · 较前7天 ' + (vp >= 0 ? '+' : '') + vp + '%');
     const best = wk.best_work;
     $('weekly-sub').textContent = wk.week_start + ' ~ ' + wk.week_end +
       (best ? ' · 本周最佳：「' + shortName(best) + '」播放 ' + fmtWan(best.views) + ' · 涨粉 ' + fmtSign(best.new_fans) : ' · 本周暂无新作品');
@@ -531,16 +624,17 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     });
   }
 
-  /* ---------- 渲染：L3 Barcode Lollipop（发丝条码 + 棒棒糖点） ---------- */
+  /* ---------- 渲染：Barcode Lollipop（含中位数基准线 + 交互） ---------- */
   function renderBarcode() {
     const svg = document.getElementById('barcode');
     const card = svg.closest('.card');
     const m = METRICS.find(x => x.key === state.metric);
     const works = filteredWorks().slice().sort((a, b) => a.publish_date < b.publish_date ? -1 : 1);
     svg.innerHTML = '';
+    hideTip(card);
     const n = works.length;
     if (!n) {
-      $('chart-title').textContent = '该分类下暂无作品';
+      document.querySelector('[data-field=chart-title]').textContent = '该分类下暂无作品';
       $('chart-sub').textContent = '换个话题试试';
       renderInsights(works);
       return;
@@ -552,15 +646,31 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     const xi = i => padL + i * step;
     const cy = v => floor - (v / vMax) * (floor - top);
     const topIdx = vals.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]).slice(0, Math.min(3, n)).map(o => o[1]);
+    const sorted = vals.slice().sort((a, b) => a - b);
+    const median = sorted[Math.floor((n - 1) / 2)];
 
     el(svg, 'line', { x1: padL, y1: floor, x2: W - padR, y2: floor, stroke: 'var(--ink)', 'stroke-width': 1.1, class: 'fade' });
+
+    /* 中位数基准线（阈值元信息） */
+    if (n >= 4 && median > 0) {
+      el(svg, 'line', { x1: padL, y1: cy(median), x2: W - padR, y2: cy(median), stroke: 'var(--muted)', 'stroke-width': 0.8, 'stroke-dasharray': '4 3', class: 'fade', style: '--d:.3s' });
+      txt(svg, { x: W - padR, y: cy(median) - 6, 'text-anchor': 'end', 'font-size': 7.5, 'font-weight': 600, fill: 'var(--muted)', 'letter-spacing': '.1em', class: 'fade', style: '--d:.4s' }, '中位 ' + m.fmt(median));
+    }
 
     works.forEach((w, i) => {
       const x = xi(i), v = vals[i], y = cy(v);
       el(svg, 'line', { x1: x.toFixed(1), y1: top, x2: x.toFixed(1), y2: floor, stroke: 'var(--grid)', 'stroke-width': 0.7, class: 'fade', style: '--d:' + (i * 0.012).toFixed(2) + 's' });
       const peak = topIdx.indexOf(i) >= 0;
-      const c = el(svg, 'circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: peak ? 4.6 : 2.7, fill: 'var(--ink)', class: 'pop', style: '--d:' + (0.12 + i * 0.012).toFixed(2) + 's' });
-      el(c, 'title', {}).textContent = w.publish_date + ' · ' + m.label + ' ' + m.fmt(v) + '\\n' + String(w.desc || '').slice(0, 42);
+      const g = el(svg, 'g', { class: 'hit', 'data-wid': w.id });
+      el(g, 'circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: 9, fill: 'transparent' });
+      el(g, 'circle', {
+        cx: x.toFixed(1), cy: y.toFixed(1), r: peak ? 4.6 : 2.7,
+        fill: peak ? 'var(--accent)' : 'var(--accent)',
+        opacity: peak ? 1 : 0.55,
+        stroke: peak ? 'var(--cardbg)' : 'none', 'stroke-width': peak ? 1.4 : 0,
+        class: 'pop', style: '--d:' + (0.12 + i * 0.012).toFixed(2) + 's'
+      });
+      bindHit(g, card, w, m.label, m.fmt(v));
     });
 
     let lastX = -1e9, lastY = 0;
@@ -584,20 +694,21 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     });
 
     const pi = vals.indexOf(Math.max.apply(null, vals));
-    $('chart-title').textContent = '「' + shortName(works[pi]) + '」' + m.label + '峰值 ' + m.fmt(vals[pi]);
+    document.querySelector('[data-field=chart-title]').textContent = '「' + shortName(works[pi]) + '」' + m.label + '峰值 ' + m.fmt(vals[pi]);
     $('chart-sub').textContent = '一根发丝 = 一个作品 · 点高 = ' + m.label + ' · 前三已标注 · 共 ' + n + ' 个';
     if (card.classList.contains('in')) replay(card);
     renderInsights(works);
   }
 
-  /* ---------- 渲染：C1 Tick Rows 涨粉榜（1 格 ≈ N 粉） ---------- */
+  /* ---------- 渲染：Tick Rows 涨粉榜 ---------- */
   function renderRank() {
     const svg = document.getElementById('tickrows');
     const card = svg.closest('.card');
     const works = filteredWorks();
     svg.innerHTML = '';
+    hideTip(card);
     if (!works.length) {
-      $('rank-title').textContent = '该分类下暂无作品';
+      document.querySelector('[data-field=rank-title]').textContent = '该分类下暂无作品';
       $('rank-sub').textContent = '';
       return;
     }
@@ -611,25 +722,30 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     top8.forEach((w, i) => {
       const y = y0 + i * rowH, v = w.new_fans || 0;
       const ticks = Math.max(1, Math.min(44, Math.round(v / unit)));
-      txt(svg, { x: X0 - 14, y: y + 3, 'text-anchor': 'end', 'font-size': 9, 'font-weight': 700, fill: 'var(--muted)', 'letter-spacing': '.04em', class: 'fade', style: '--d:' + (i * 0.06).toFixed(2) + 's' }, shortName(w));
-      el(svg, 'line', { x1: X0, y1: y + 8, x2: X0 + 44 * PX, y2: y + 8, stroke: 'var(--grid)', 'stroke-width': 0.6, class: 'fade', style: '--d:' + (i * 0.06).toFixed(2) + 's' });
+      const g = el(svg, 'g', { class: 'hit', 'data-wid': w.id });
+      el(g, 'rect', { x: 0, y: y - 10, width: 800, height: 24, fill: 'transparent' });
+      txt(g, { x: X0 - 14, y: y + 3, 'text-anchor': 'end', 'font-size': 9, 'font-weight': 700, fill: 'var(--muted)', 'letter-spacing': '.04em', class: 'fade', style: '--d:' + (i * 0.06).toFixed(2) + 's' }, shortName(w));
+      el(g, 'line', { x1: X0, y1: y + 8, x2: X0 + 44 * PX, y2: y + 8, stroke: 'var(--grid)', 'stroke-width': 0.6, class: 'fade', style: '--d:' + (i * 0.06).toFixed(2) + 's' });
       for (let k = 0; k < ticks; k++) {
         const x = X0 + k * PX + PX / 2, h = 8 + rnd(k + 1, i + 2) * 6;
-        el(svg, 'line', { x1: x.toFixed(1), y1: y + 8, x2: x.toFixed(1), y2: (y + 8 - h).toFixed(1), stroke: 'var(--ink)', 'stroke-width': 1, opacity: (0.55 + rnd(k + 3, i + 5) * 0.45).toFixed(2), class: 'fade', style: '--d:' + (i * 0.06 + k * 0.008).toFixed(2) + 's' });
-        if (k % 5 === 4) el(svg, 'circle', { cx: x.toFixed(1), cy: y + 12, r: 0.9, fill: 'var(--faint)', class: 'fade', style: '--d:' + (i * 0.06 + k * 0.008).toFixed(2) + 's' });
+        el(g, 'line', { x1: x.toFixed(1), y1: y + 8, x2: x.toFixed(1), y2: (y + 8 - h).toFixed(1), stroke: 'var(--accent)', 'stroke-width': 1.1, opacity: (0.5 + rnd(k + 3, i + 5) * 0.5).toFixed(2), class: 'fade', style: '--d:' + (i * 0.06 + k * 0.008).toFixed(2) + 's' });
+        if (k % 5 === 4) el(g, 'circle', { cx: x.toFixed(1), cy: y + 12, r: 0.9, fill: 'var(--faint)', class: 'fade', style: '--d:' + (i * 0.06 + k * 0.008).toFixed(2) + 's' });
       }
-      const lab = txt(svg, { x: (X0 + ticks * PX + 10).toFixed(1), y: y + 4, 'font-size': 12, 'font-weight': 800, fill: 'var(--ink)', class: 'fade', style: '--d:' + (0.3 + i * 0.06).toFixed(2) + 's' }, fmtSign(v));
-      el(lab, 'title', {}).textContent = String(w.desc || '').slice(0, 42) + '\\n涨粉 ' + fmtSign(v) + ' · 播放 ' + fmtWan(w.views);
+      txt(g, { x: (X0 + ticks * PX + 10).toFixed(1), y: y + 4, 'font-size': 12, 'font-weight': 800, fill: 'var(--ink)', class: 'fade', style: '--d:' + (0.3 + i * 0.06).toFixed(2) + 's' }, fmtSign(v));
+      g.addEventListener('mouseenter', () => showTip(card, g,
+        esc(shortName(w)) + '\n<span class="t-metric">涨粉 ' + esc(fmtSign(v)) + '</span> · 播放 ' + esc(fmtWan(w.views)) + ' · ' + esc(w.publish_date.slice(0, 10))));
+      g.addEventListener('mouseleave', () => hideTip(card));
+      g.addEventListener('click', () => linkToTable(w.id));
     });
     txt(svg, { x: 400, y: 292, 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 600, fill: 'var(--faint)', 'letter-spacing': '.12em', class: 'fade', style: '--d:.75s' }, 'ONE TICK ≈ ' + unit + ' 粉 · 点标每第五根');
 
     const share = totalFans > 0 ? Math.round((top8[0].new_fans || 0) / totalFans * 100) : 0;
-    $('rank-title').textContent = '「' + shortName(top8[0]) + '」一条带来 ' + share + '% 涨粉';
+    document.querySelector('[data-field=rank-title]').textContent = '「' + shortName(top8[0]) + '」一条带来 ' + share + '% 涨粉';
     $('rank-sub').textContent = '一格 ≈ ' + unit + ' 粉 · 点标每第五格 · 取前 ' + top8.length + ' 名 · 按涨粉排序';
     if (card.classList.contains('in')) replay(card);
   }
 
-  /* ---------- 渲染：四条注脚（洞察列） ---------- */
+  /* ---------- 渲染：四条注脚 ---------- */
   function renderInsights(works) {
     const box = $('insights');
     if (!works.length) { box.innerHTML = '<div class="note"><span class="n-desc">该分类下暂无作品</span></div>'; return; }
@@ -637,14 +753,14 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     const pool = big.length >= 3 ? big : works;
     const pick = fn => pool.reduce((a, b) => (fn(b) > fn(a) ? b : a), pool[0]);
     const cards = [
-      { tag: '涨粉王 FAN MAGNET', w: pick(w => w.new_fans || 0), v: w => fmtSign(w.new_fans) + ' 粉' },
-      { tag: '播放王 MOST SEEN', w: pick(w => w.views || 0), v: w => fmtWan(w.views) + ' 播放' },
-      { tag: '完播王 RETENTION', w: pick(w => w.completion_rate_5s || 0), v: w => (w.completion_rate_5s || 0).toFixed(1) + '% 5s完播' },
-      { tag: '跳出预警 BOUNCE RISK', warn: true, w: pick(w => w.bounce_rate_2s || 0), v: w => (w.bounce_rate_2s || 0).toFixed(1) + '% 2s跳出' },
+      { tag: '涨粉王 FAN MAGNET', icon: 'users', w: pick(w => w.new_fans || 0), v: w => fmtSign(w.new_fans) + ' 粉' },
+      { tag: '播放王 MOST SEEN', icon: 'eye', w: pick(w => w.views || 0), v: w => fmtWan(w.views) + ' 播放' },
+      { tag: '完播王 RETENTION', icon: 'bookmark', w: pick(w => w.completion_rate_5s || 0), v: w => (w.completion_rate_5s || 0).toFixed(1) + '% 5s完播' },
+      { tag: '跳出预警 BOUNCE RISK', icon: 'alert', warn: true, w: pick(w => w.bounce_rate_2s || 0), v: w => (w.bounce_rate_2s || 0).toFixed(1) + '% 2s跳出' },
     ];
     box.innerHTML = cards.map(c =>
       '<div class="note' + (c.warn ? ' warn' : '') + '">' +
-      '<span class="n-tag">' + esc(c.tag) + '</span>' +
+      '<span class="n-tag"><span class="n-ic">' + ic(c.icon, 11) + '</span>' + esc(c.tag) + '</span>' +
       '<span class="n-val">' + esc(c.v(c.w)) + '</span>' +
       '<span class="n-desc" title="' + esc(c.w.desc) + '">' + esc(shortName(c.w)) + ' · ' + esc(c.w.publish_date.slice(0, 10)) + '</span>' +
       '</div>').join('');
@@ -703,7 +819,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       const nf = w.new_fans || 0;
       const nfCls = nf > 0 ? 'num-pos' : nf < 0 ? 'num-neg' : '';
       const bw = Math.max(2, Math.round((w.views || 0) / maxViews * 56));
-      return '<tr>' +
+      return '<tr data-wid="' + esc(w.id) + '">' +
         '<td class="cell-desc" title="' + esc(w.desc) + '">' + esc(shortName(w)) + badges + '<span class="date">' + esc(w.publish_date) + ' · ' + Math.round((w.duration_sec || 0) / 6) / 10 + 'min</span></td>' +
         '<td><span class="vbar" style="inline-size:' + bw + 'px"></span>' + fmtWan(w.views) + '</td>' +
         '<td class="' + nfCls + '">' + fmtSign(nf) + '</td>' +
@@ -715,14 +831,17 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
         '<td>' + (w.cover_click_rate == null ? '—' : w.cover_click_rate.toFixed(1) + '%') + '</td>' +
         '</tr>';
     }).join('');
-    $('table-note').textContent = '共 ' + works.length + ' 个公开作品 · 比率类指标为全生命周期累计 · 点表头排序';
+    tbody.querySelectorAll('tr[data-wid]').forEach(tr => {
+      tr.addEventListener('click', () => linkToChart(tr.getAttribute('data-wid')));
+    });
+    $('table-note').textContent = '共 ' + works.length + ' 个公开作品 · 比率类指标为全生命周期累计 · 点表头排序 · 点行定位到趋势图';
   }
 
   function renderFooter(d) {
-    $('foot-note').textContent = '数据口径 · 公开作品 ' + (d.total || 0) + ' 个 · 来源 抖音创作者中心 · 每日自动更新 · LUPI EDITORIAL';
+    $('foot-note').textContent = '数据口径 · 公开作品 ' + (d.total || 0) + ' 个 · 来源 抖音创作者中心 · 每日自动更新 · 青囊 CLINICAL';
   }
 
-  /* ---------- 像素背景场（发布节奏->密度间距，涨粉->透明度） ---------- */
+  /* ---------- 像素背景场（青绿调） ---------- */
   function mountPixel(d) {
     const works = d.works || [];
     const months = new Set(works.map(w => w.publish_date.slice(0, 7))).size || 1;
@@ -731,15 +850,17 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     const spacing = Math.max(16, Math.min(24, 24 - perMonth * 1.4));
     const opacity = Math.max(0.08, Math.min(0.15, 0.08 + avgFans / 1600));
     if (pixelField) pixelField.destroy();
+    const stage = document.querySelector('.kimi-pixel-stage');
+    stage.style.color = 'var(--accent)';
     pixelField = KimiPixelField.mount(document.querySelector('[data-kimi-pixel-background]'), {
       mode: 'density', mark: 'ascii', seed: works.length * 13 + 7,
-      spacing: spacing, opacity: opacity, variance: 0.42,
-      pointer: true, pointerTarget: document.querySelector('.kimi-pixel-stage'),
+      spacing: spacing, opacity: opacity, variance: 0.42, color: '#0E7C6B',
+      pointer: true, pointerTarget: stage,
       tier: document.documentElement.getAttribute('data-daimon-size-tier') === 'compact' ? 'compact' : 'regular',
     });
   }
 
-  /* ---------- viewState 持久化（Canvas 环境） ---------- */
+  /* ---------- viewState 持久化 ---------- */
   function persistView() {
     try {
       if (window.DaimonCanvas && window.DaimonCanvas.setViewState) {
@@ -774,6 +895,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     if (!payload || !payload.works) return;
     state.data = payload;
     restoreViewOnce();
+    mountStaticIcons();
     renderKpi(payload);
     renderDaily(payload);
     renderWeekly(payload);
