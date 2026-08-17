@@ -445,7 +445,9 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
 
 /* ======== 热点调研（Radar） ======== */
 .rd-temps { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin-top: 12px; }
-.rd-temp { background: var(--paper); border-radius: 15px; padding: 13px 14px; border: 1px solid transparent; cursor: pointer; transition: border-color .15s, transform .15s; }
+.rd-temp { background: var(--paper); border-radius: 15px; padding: 13px 14px; border: 1px solid transparent; cursor: pointer; transition: border-color .15s, transform .15s; position: relative; }
+.rd-now { position: absolute; top: 8px; right: 8px; font-size: 9px; padding: 3px 9px; opacity: .55; }
+.rd-temp:hover .rd-now { opacity: 1; }
 .rd-temp:hover { border-color: rgba(23,37,33,.16); transform: translateY(-1px); }
 .rd-temp.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,124,107,.12); }
 .rd-temp.off { opacity: .62; cursor: default; }
@@ -2097,7 +2099,7 @@ details.tb-stmini[open] { border-color: var(--accent-soft); }
             <section class="card kimi-pixel-label-safe" data-kimi-priority="p0">
               <h2><span class="h-ic" data-ic="pen"></span>AI 选题提案 · 脚本流水线</h2>
               <div class="sub" id="ws-pipe-sub" data-field="ws-pipe-sub">热点调研产出选题 → 提案批准即立项 → 方向 → 文献 → 结构 → 撰稿 → 修订 → 排雷 → 交付 · 每一步 AI 交付、你拍板</div>
-              <div id="ws-tb-mount"></div>
+              <div id="ws-tb-mount" data-field="ws-tb-mount"></div>
               <div class="src">PIPELINE · 提案看板批准即立项 · 斜纹泳道=AI 自动作业 · 金色泳道=人工闸门 · 否决的选题永不复推</div>
             </section>
 
@@ -2177,6 +2179,13 @@ details.tb-stmini[open] { border-color: var(--accent-soft); }
               <div class="sub" id="sch-lane-sub" data-field="sch-lane-sub">内部合约 + 外部商务承接 · 掉链自动预警</div>
               <div class="sch-lane" id="sch-lane" data-field="sch-lane"></div>
               <div class="src">BUSINESS LANE · 与收益中心合约联动 · 掉链自动预警</div>
+            </section>
+
+            <section class="card kimi-pixel-label-safe" data-kimi-priority="p0">
+              <h2><span class="h-ic" data-ic="rows"></span>生产排期 · 拍摄→剪辑→发布</h2>
+              <div class="sub" id="sch-prod-sub" data-field="sch-prod-sub">脚本工坊交付的稿件自动流入 · 拍摄限周三/周五（医生值班日）· 剪辑独立排期</div>
+              <div class="sch-prod" id="sch-prod" data-field="sch-prod"></div>
+              <div class="src">PRODUCTION PIPELINE · 脚本交付 → 拍摄（周三/周五）→ 剪辑 → 定发布日 → 上日历</div>
             </section>
 
             <section class="card kimi-pixel-label-safe" data-kimi-priority="p0">
@@ -3309,6 +3318,53 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       laneEl.innerHTML = laneHtml;
     }
 
+    /* ---- 生产排期：脚本交付 → 拍摄(周三/五) → 剪辑 → 发布 ---- */
+    const prodEl = $('sch-prod');
+    if (prodEl) {
+      const prod = items.filter(i => i.type === 'organic' && i.tb_topic_id && ['to_shoot', 'to_edit', 'ready'].indexOf(i.status) >= 0);
+      const sub = $('sch-prod-sub');
+      if (sub) sub.textContent = prod.length
+        ? '在制 ' + prod.length + ' 条 · 待拍摄 ' + prod.filter(i => i.status === 'to_shoot').length + ' · 待剪辑 ' + prod.filter(i => i.status === 'to_edit').length + ' · 待发布 ' + prod.filter(i => i.status === 'ready').length
+        : '脚本工坊交付的稿件自动流入 · 拍摄限周三/周五（医生值班日）· 剪辑独立排期';
+      const STG = [['to_shoot', '待拍摄'], ['to_edit', '待剪辑'], ['ready', '待发布']];
+      prodEl.innerHTML = prod.length ? prod.map(it => {
+        const cur = STG.findIndex(s => s[0] === it.status);
+        const steps = '<div class="sch-steps">' + STG.map((s, i) =>
+          '<div class="st' + (i < cur ? ' done' : i === cur ? ' now' : '') + '"><u></u><span>' + s[1] + '</span></div>').join('') + '</div>';
+        let acts = '';
+        if (it.status === 'to_shoot') acts = '<button class="tb-mini pri" data-prod="shot_done|' + esc(it.id) + '">✓ 拍摄完成</button>'
+          + '<button class="tb-mini" data-prod="set_shoot|' + esc(it.id) + '">改拍摄日</button>';
+        else if (it.status === 'to_edit') acts = '<button class="tb-mini pri" data-prod="edit_done|' + esc(it.id) + '">✓ 剪辑完成</button>';
+        else if (it.status === 'ready') acts = '<button class="tb-mini pri" data-prod="set_pub|' + esc(it.id) + '">📅 定发布日</button>';
+        acts += '<button class="tb-mini" data-prod="drop|' + esc(it.id) + '">移除</button>';
+        return '<div class="ln-card"><div class="ln-head"><b>' + esc(it.title || '') + '</b><i>自然流 · 工单 ' + esc(it.tb_topic_id || '') + '</i></div>'
+          + steps
+          + '<div class="ln-foot">'
+          + (it.shoot_date ? '<span>拍摄日 <b>' + esc(it.shoot_date.slice(5).replace('-', '/')) + '</b>（周三/周五值班日）</span>' : '<span>拍摄日待定</span>')
+          + (it.edit_due ? '<span>剪辑截止 <b>' + esc(it.edit_due.slice(5).replace('-', '/')) + '</b></span>' : '')
+          + (it.planned_date ? '<span>计划发布 <b>' + esc(it.planned_date.slice(5).replace('-', '/')) + ' ' + esc(it.planned_time || '') + '</b></span>' : '')
+          + '</div><div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">' + acts + '</div></div>';
+      }).join('') : '<div class="tb-empty">暂无在制稿件 · 脚本工坊「交付完成」的选题会自动出现在这里</div>';
+      if (!prodEl.getAttribute('data-bound')) {
+        prodEl.setAttribute('data-bound', '1');
+        prodEl.addEventListener('click', ev => {
+          const b = ev.target.closest('[data-prod]');
+          if (!b) return;
+          const parts = b.getAttribute('data-prod').split('|');
+          const op = parts[0], id = parts[1];
+          if (op === 'set_shoot' || op === 'set_pub') {
+            const d2 = prompt(op === 'set_shoot' ? '输入拍摄日期（YYYY-MM-DD，医生值班日周三/周五）' : '输入发布日期（YYYY-MM-DD，默认 21:00 发布）');
+            if (!d2) return;
+            schedOp({ op: op, item_id: id, date: d2.trim() });
+          } else if (op === 'drop') {
+            if (confirm('确定从生产排期移除这条？（不删除脚本本体）')) schedOp({ op: 'drop', item_id: id });
+          } else {
+            schedOp({ op: op, item_id: id });
+          }
+        });
+      }
+    }
+
     /* ---- 发布日历（当月） ---- */
     const calEl = $('sch-cal');
     if (calEl) {
@@ -4436,6 +4492,24 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     return true;
   }
   function tbOkToast(text) { tlToast(text, false); const tt = document.querySelector('.tl-toast'); if (tt) tt.classList.add('ok'); }
+  function schedOp(payload) {
+    payload.action = 'sched_op';
+    const host = window.DaimonWidget;
+    if (!host || !host.emit) { tlToast('预览页操作不生效：请到 Kimi 看板面板里操作', true); return false; }
+    if (host.saveInput) host.saveInput(payload);
+    host.emit('submit', payload);
+    tbOkToast('✓ 已提交成功，看板几秒后自动刷新');
+    return true;
+  }
+  function radarOp(payload) {
+    payload.action = 'radar_op';
+    const host = window.DaimonWidget;
+    if (!host || !host.emit) { tlToast('预览页操作不生效：请到 Kimi 看板面板里操作', true); return false; }
+    if (host.saveInput) host.saveInput(payload);
+    host.emit('submit', payload);
+    tbOkToast('✓ 已启动「' + (payload.keyword || '') + '」立即调研（约 1-2 分钟），完成后看板自动刷新');
+    return true;
+  }
   /* 栏目「立即执行」批处理：调研=全部运行中项目立即采集（绕过周一等待）；分析类=全部重新派单（执行器 10 分钟巡检内接单） */
   function tbRunAll(kind) {
     const tb = tbData();
@@ -5737,13 +5811,15 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
         const it = idx[kw] || {};
         if (it.status === 'not_indexed' || it.search_index_avg == null) {
           return '<div class="rd-temp off"><div class="kw">' + esc(kw) + '<span class="nil">未收录</span></div>' +
-            '<div class="vol">指数尚未收录 · 供给侧观察中</div></div>';
+            '<div class="vol">指数尚未收录 · 供给侧观察中</div>' +
+            '<button class="tb-mini rd-now" data-rd-now="' + esc(kw) + '">⚡ 立即调研</button></div>';
         }
         const mom = parseFloat(String(it.mom || '').replace('%', ''));
         const yoy = parseFloat(String(it.yoy || '').replace('%', ''));
         const tp = byKw[kw] && byKw[kw].topics && byKw[kw].topics[0];
         return '<div class="rd-temp' + (rdState.tempKw === kw ? ' on' : '') + '" data-kw="' + esc(kw) + '">' +
           '<div class="kw">' + esc(kw) + '</div>' +
+          '<button class="tb-mini rd-now" data-rd-now="' + esc(kw) + '">⚡ 立即调研</button>' +
           '<div class="idx">' + esc(fmtWan(it.search_index_avg)) + '<small>/日</small></div>' +
           '<div class="dl">' + rdDelta('环比', mom) + rdDelta('同比', yoy) + '</div>' +
           (tp ? '<div class="vol">话题「' + esc(tp.name) + '」累计 ' + esc(fmtWan(tp.plays)) + ' 播放</div>' : '') +
@@ -5761,6 +5837,12 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       if (!temps.getAttribute('data-bound')) {
         temps.setAttribute('data-bound', '1');
         temps.addEventListener('click', e => {
+          const now = e.target.closest('[data-rd-now]');
+          if (now) {
+            e.stopPropagation();
+            radarOp({ op: 'collect_kw', keyword: now.getAttribute('data-rd-now') });
+            return;
+          }
           const card = e.target.closest('.rd-temp[data-kw]');
           if (!card) return;
           const kw = card.getAttribute('data-kw');
