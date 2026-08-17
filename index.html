@@ -446,8 +446,12 @@ html[data-daimon-size-tier="compact"] .kpi { border-inline-start: 0; padding-inl
 /* ======== 热点调研（Radar） ======== */
 .rd-temps { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin-top: 12px; }
 .rd-temp { background: var(--paper); border-radius: 15px; padding: 13px 14px; border: 1px solid transparent; cursor: pointer; transition: border-color .15s, transform .15s; position: relative; }
-.rd-now { position: absolute; top: 8px; right: 8px; font-size: 9px; padding: 3px 9px; opacity: .55; }
-.rd-temp:hover .rd-now { opacity: 1; }
+.rd-sec-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 2px 0 10px; }
+.rd-sec-ts { font-size: 10px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.rd-sec-acts { display: flex; gap: 8px; align-items: center; }
+.rd-sec-btn[disabled], .rd-sec-master[disabled] { opacity: .75; cursor: default; }
+.rd-spin { display: inline-block; width: 9px; height: 9px; border: 2px solid rgba(14,124,107,.25); border-top-color: var(--accent); border-radius: 50%; animation: rdspin .8s linear infinite; vertical-align: -1px; margin-right: 5px; }
+@keyframes rdspin { to { transform: rotate(360deg); } }
 .rd-temp:hover { border-color: rgba(23,37,33,.16); transform: translateY(-1px); }
 .rd-temp.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,124,107,.12); }
 .rd-temp.off { opacity: .62; cursor: default; }
@@ -4507,7 +4511,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
     if (!host || !host.emit) { tlToast('预览页操作不生效：请到 Kimi 看板面板里操作', true); return false; }
     if (host.saveInput) host.saveInput(payload);
     host.emit('submit', payload);
-    tbOkToast('✓ 已启动「' + (payload.keyword || '') + '」立即调研（约 1-2 分钟），完成后看板自动刷新');
+    tbOkToast('✓ 已启动' + (payload.keyword ? '「' + payload.keyword + '」' : '') + '调研工作，完成后看板自动刷新并弹完成提示');
     return true;
   }
   /* 栏目「立即执行」批处理：调研=全部运行中项目立即采集（绕过周一等待）；分析类=全部重新派单（执行器 10 分钟巡检内接单） */
@@ -5790,7 +5794,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
   }
 
   /* ======== 热点调研（Radar） ======== */
-  const rdState = { tempKw: null, hitsKw: null, seed: null };
+  const rdState = { tempKw: null, hitsKw: null, seed: null, working: {} };
   function rdDelta(label, v) {
     if (v == null || isNaN(v)) return '<span>' + label + ' —</span>';
     const up = v >= 0;
@@ -5811,15 +5815,13 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
         const it = idx[kw] || {};
         if (it.status === 'not_indexed' || it.search_index_avg == null) {
           return '<div class="rd-temp off"><div class="kw">' + esc(kw) + '<span class="nil">未收录</span></div>' +
-            '<div class="vol">指数尚未收录 · 供给侧观察中</div>' +
-            '<button class="tb-mini rd-now" data-rd-now="' + esc(kw) + '">⚡ 立即调研</button></div>';
+            '<div class="vol">指数尚未收录 · 供给侧观察中</div></div>';
         }
         const mom = parseFloat(String(it.mom || '').replace('%', ''));
         const yoy = parseFloat(String(it.yoy || '').replace('%', ''));
         const tp = byKw[kw] && byKw[kw].topics && byKw[kw].topics[0];
         return '<div class="rd-temp' + (rdState.tempKw === kw ? ' on' : '') + '" data-kw="' + esc(kw) + '">' +
           '<div class="kw">' + esc(kw) + '</div>' +
-          '<button class="tb-mini rd-now" data-rd-now="' + esc(kw) + '">⚡ 立即调研</button>' +
           '<div class="idx">' + esc(fmtWan(it.search_index_avg)) + '<small>/日</small></div>' +
           '<div class="dl">' + rdDelta('环比', mom) + rdDelta('同比', yoy) + '</div>' +
           (tp ? '<div class="vol">话题「' + esc(tp.name) + '」累计 ' + esc(fmtWan(tp.plays)) + ' 播放</div>' : '') +
@@ -5837,12 +5839,6 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       if (!temps.getAttribute('data-bound')) {
         temps.setAttribute('data-bound', '1');
         temps.addEventListener('click', e => {
-          const now = e.target.closest('[data-rd-now]');
-          if (now) {
-            e.stopPropagation();
-            radarOp({ op: 'collect_kw', keyword: now.getAttribute('data-rd-now') });
-            return;
-          }
           const card = e.target.closest('.rd-temp[data-kw]');
           if (!card) return;
           const kw = card.getAttribute('data-kw');
@@ -6145,6 +6141,85 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
         (p.hypothesis ? '<p>' + esc(p.hypothesis) + '</p>' : '') +
         (p.verify ? '<p><b>验证方式：</b>' + esc(p.verify) + '</p>' : '') +
         '</div>').join('') : '<div class="ana-empty">暂无预测性选题</div>';
+    }
+
+    /* ⑤ 板块动作条：更新时间 + 立即工作开关 + 加载动效 + 完成提示 */
+    rdSecBars(d);
+  }
+
+  function rdTsNum(s) {
+    if (!s) return 0;
+    const t = Date.parse(String(s).replace(' ', 'T'));
+    return isNaN(t) ? 0 : t;
+  }
+  function rdSecBars(d) {
+    const r = d.radar || {};
+    const sts = r.section_ts || {};
+    const evoEntries = ((d.radar_evolution || {}).entries) || [];
+    const evoLatest = evoEntries.length ? evoEntries[evoEntries.length - 1] : null;
+    const boardTs = (r.topics_board && r.topics_board.updated_at) || sts.board;
+    const SECS = [
+      { key: 'index', field: 'rd-temps', label: '需求温度带', btn: '⚡ 立即调研本板块', kind: 'collect', section: 'index', ts: sts.index || r.collected_at, master: true },
+      { key: 'evolve', field: 'rd-evo-current', label: '关键词进化', btn: '⚡ 立即进化', kind: 'chain', steps: ['evolve'], ts: evoLatest ? evoLatest.run_at : null },
+      { key: 'related', field: 'rd-rel2', label: '关联词地图', btn: '⚡ 立即调研本板块', kind: 'collect', section: 'related', ts: sts.related || r.collected_at },
+      { key: 'soaring', field: 'rd-soar', label: '飙升雷达', btn: '⚡ 立即调研本板块', kind: 'collect', section: 'soaring', ts: sts.soaring || r.collected_at },
+      { key: 'douhot', field: 'rd-hits', label: '赛道爆款池', btn: '⚡ 立即调研本板块', kind: 'collect', section: 'douhot', ts: sts.douhot || r.collected_at },
+      { key: 'douhot2', field: 'rd-hot', label: '蹭热点机会', btn: '⚡ 立即调研本板块', kind: 'collect', section: 'douhot', ts: sts.douhot || r.collected_at },
+      { key: 'board', field: 'rd-topics', label: '本周选题建议', btn: '⚡ 立即生成选题建议', kind: 'chain', steps: ['board'], ts: boardTs },
+    ];
+    /* 完成检测：板块更新时间晚于点击时间 → 弹完成提示并解除加载态 */
+    Object.keys(rdState.working).forEach(k => {
+      const spec = SECS.find(x => x.key === k) || (k === 'all' ? { label: '全链路采集', ts: r.collected_at } : null);
+      if (!spec) { delete rdState.working[k]; return; }
+      const tsN = rdTsNum(spec.ts);
+      if (tsN > rdState.working[k]) {
+        delete rdState.working[k];
+        tlToast('✓ 「' + spec.label + '」已跑完更新，数据是新的了', false);
+        const tt = document.querySelector('.tl-toast'); if (tt) tt.classList.add('ok');
+      }
+    });
+    SECS.forEach(spec => {
+      const anchor = $(spec.field);
+      if (!anchor) return;
+      const sec = anchor.closest('section');
+      if (!sec) return;
+      let bar = sec.querySelector('.rd-sec-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.className = 'rd-sec-bar';
+        const h2 = sec.querySelector('h2');
+        if (h2) h2.insertAdjacentElement('afterend', bar); else sec.insertBefore(bar, sec.firstChild);
+      }
+      const working = !!rdState.working[spec.key];
+      const tsTxt = spec.ts ? '更新于 ' + esc(String(spec.ts)) : '尚未跑过';
+      bar.innerHTML = '<span class="rd-sec-ts">' + tsTxt + '</span><span class="rd-sec-acts">'
+        + (spec.master ? '<button class="tb-mini pri rd-sec-master" data-rdsec="all"' + (rdState.working.all ? ' disabled' : '') + '>'
+          + (rdState.working.all ? '<span class="rd-spin"></span>全链路工作中…' : '⚡ 全链路立即跑（采集→进化→选题建议）') + '</button>' : '')
+        + '<button class="tb-mini rd-sec-btn" data-rdsec="' + spec.key + '"' + (working ? ' disabled' : '') + '>'
+        + (working ? '<span class="rd-spin"></span>工作中…' : spec.btn) + '</button></span>';
+    });
+    const page = document.querySelector('[data-page="radar"]');
+    if (page && !page.getAttribute('data-rdsec-bound')) {
+      page.setAttribute('data-rdsec-bound', '1');
+      page.addEventListener('click', e => {
+        const b = e.target.closest('[data-rdsec]');
+        if (!b || b.disabled) return;
+        const key = b.getAttribute('data-rdsec');
+        const now = Date.now();
+        if (key === 'all') {
+          rdState.working.all = now;
+          rdState.working.evolve = now;
+          rdState.working.board = now;
+          radarOp({ op: 'collect_all' });
+        } else {
+          const spec = SECS.find(x => x.key === key);
+          if (!spec) return;
+          rdState.working[key] = now;
+          if (spec.kind === 'collect') radarOp({ op: 'collect_section', section: spec.section });
+          else radarOp({ op: 'queue_chain', steps: spec.steps });
+        }
+        renderRadar(state.data);
+      });
     }
   }
 
