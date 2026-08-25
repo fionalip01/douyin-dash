@@ -6149,7 +6149,7 @@ const SAMPLE_DATA = {"account": {"name": "营养斯", "douyin_id": "yingyangsi",
       }
 
       /* 关键词管理面板：增 / 删 / 替换（手动添加自动锁定防进化淘汰） */
-      let kwm = $('rd-kwmgr');
+      let kwm = document.getElementById('rd-kwmgr');
       if (!kwm) {
         kwm = document.createElement('div');
         kwm.id = 'rd-kwmgr';
