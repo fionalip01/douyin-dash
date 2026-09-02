@@ -10694,25 +10694,6 @@ Hello, 这里是浙江大学附属浙江医院副主任营养斯。如果你正�
     "tb_topic_id": "wo_heitou",
     "shot_at": "2026-08-18",
     "edited_at": "2026-08-18"
-   },
-   {
-    "id": "sch_tb_B10",
-    "title": "减肥总反弹？先搞懂热量缺口是怎么骗你的",
-    "type": "organic",
-    "deal_id": null,
-    "contract_id": null,
-    "topic_id": null,
-    "tb_topic_id": "B10",
-    "script_ref": "B10",
-    "status": "to_shoot",
-    "shoot_date": "2026-09-04",
-    "edit_due": "2026-09-06",
-    "planned_date": null,
-    "planned_time": "21:00",
-    "tags": [],
-    "work_id": null,
-    "checklist_green": true,
-    "notes": "脚本工坊交付自动流入 · 拍摄限周三/周五（医生值班日）· 剪辑排期独立"
    }
   ]
  },
@@ -37371,13 +37352,13 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
 12. 普通人怎么校准（吃 2 周看体重趋势调整）
 【关键类比（必须用上）】把身体比作一个公司 —— 基础代谢是维持公司运转的固定成本（房租、水电、员工工资），活动消耗是加班产生的额外成本，食物热效应是加工原材料的费用。热量缺口就是 \"收入小于支出\"，缺口太大公司会裁员（掉肌肉）、降薪（降代谢），进入 \"低电量模式\"。",
       "score": null,
-      "status": "delivered",
+      "status": "pipeline",
       "evidence": [
        "系列策划案驱动 · 书房/文献素材见策划案与文献环节"
       ],
       "created_at": "2026-09-02",
       "pipeline": {
-       "stage": "done",
+       "stage": "draft",
        "started_at": "2026-09-02 14:30:24",
        "ai_request": null,
        "directions": [
@@ -37586,6 +37567,18 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
          "selected": true,
          "claim_id": "cl8",
          "stance": "falsify"
+        },
+        {
+         "id": "L17",
+         "selected": true,
+         "stance": "support",
+         "claim_id": "cl-age",
+         "title": "Daily energy expenditure through the human life course",
+         "journal": "Science",
+         "year": 2021,
+         "authors": "Pontzer H, Yamada Y, Sagayama H, et al.",
+         "url": "https://pubmed.ncbi.nlm.nih.gov/34385400/",
+         "note": "29 国 6400 余人双标水法研究：20-60 岁总能量消耗稳定，60 岁后才明显下降"
         }
        ],
        "lit_sealed": true,
@@ -38915,13 +38908,51 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
 所以，当你看到别人吃同样多的东西不胖，而你一吃就胖，别急着怪自己意志力差，很可能是你的基础代谢“出厂设置”就比别人低。这就是为什么，盲目套用网上的热量缺口公式，对很多人来说根本不适用。
 
 那怎么办？别急，后面我会告诉你，怎么科学地算出属于你自己的热量缺口，以及为什么缺口太大反而会反弹。先把这个底层逻辑记住：减肥不是跟食物较劲，而是跟你的基础代谢合作。",
-            "annotations": []
+            "annotations": [
+             {
+              "claim": "他们的基础代谢能差出300到500千卡每天",
+              "lit_id": "L1",
+              "lit_title": "Centile reference chart for resting metabolic rate through the life course",
+              "supports": "RMR 百分位参考图显示：经瘦体重校正后同体重个体静息代谢差异显著，可达每日数百千卡。"
+             },
+             {
+              "claim": "每公斤肌肉每天能消耗13千卡左右，而脂肪只能消耗4.5千卡",
+              "lit_id": "L9",
+              "lit_title": "High-Quality Weight Loss in Obesity: Importance of Skeletal Muscle",
+              "supports": "骨骼肌是高代谢活性组织，保肌对维持能量消耗至关重要；肌肉与脂肪的单位代谢率相差约 3 倍。"
+             },
+             {
+              "claim": "甲状腺激素水平、基因，都会影响你的基础代谢",
+              "lit_id": "L2",
+              "lit_title": "Association of Thyroid Hormones with Basal Metabolism and Body Composition",
+              "supports": "甲状腺激素水平与基础代谢率显著相关，甲减可明显降低代谢。"
+             },
+             {
+              "claim": "20 到 60 岁之间，人的总能量消耗其实保持稳定",
+              "lit_id": "L17",
+              "lit_title": "Daily energy expenditure through the human life course",
+              "supports": "Pontzer 等 Science 2021：29 国 6400 余人双标水法，20-60 岁能量消耗稳定，60 岁后年降约 0.7%。"
+             }
+            ]
            },
            {
             "title": "热量缺口怎么算",
             "text": "那热量缺口到底怎么算？记住一个公式：你的每日总消耗，也就是TDEE，减去300到500千卡，就是你的安全缺口。TDEE 需要用你的身高、体重、年龄、性别算出基础代谢，再乘以活动系数（1.2 到 1.7，久坐取 1.2，经常运动取 1.6-1.7）。后面我会讲具体公式，这里先记住：安全缺口是 TDEE 减 300 到 500 千卡。然后，每天吃进去的热量控制在TDEE减300到500之间，这样每周大概能减0.5到1斤，是身体能承受的安全速度。注意，这个缺口不是越大越好，超过500千卡，身体就会启动防御机制，主动降低消耗，反而更容易反弹。具体操作上，你可以用App记录三天饮食，算出平均摄入，再对照这个公式调整。记住，减重不是饿出来的，是科学规划出来的。",
             "content": "那热量缺口到底怎么算？记住一个公式：你的每日总消耗，也就是TDEE，减去300到500千卡，就是你的安全缺口。TDEE 需要用你的身高、体重、年龄、性别算出基础代谢，再乘以活动系数（1.2 到 1.7，久坐取 1.2，经常运动取 1.6-1.7）。后面我会讲具体公式，这里先记住：安全缺口是 TDEE 减 300 到 500 千卡。然后，每天吃进去的热量控制在TDEE减300到500之间，这样每周大概能减0.5到1斤，是身体能承受的安全速度。注意，这个缺口不是越大越好，超过500千卡，身体就会启动防御机制，主动降低消耗，反而更容易反弹。具体操作上，你可以用App记录三天饮食，算出平均摄入，再对照这个公式调整。记住，减重不是饿出来的，是科学规划出来的。",
-            "annotations": []
+            "annotations": [
+             {
+              "claim": "每周大概能减0.5到1斤，是身体能承受的安全速度",
+              "lit_id": "L3",
+              "lit_title": "Calorie Restriction with or without Time-Restricted Eating in Weight Loss (NEJM)",
+              "supports": "NEJM 随机对照试验：适度热量限制下体重平稳下降，温和缺口可持续、依从性更好。"
+             },
+             {
+              "claim": "超过500千卡，身体就会启动防御机制，主动降低消耗",
+              "lit_id": "L5",
+              "lit_title": "Effect of calorie restriction on resting metabolic rate",
+              "supports": "热量限制可诱发静息代谢率下降（代谢适应），缺口越大适应越明显。"
+             }
+            ]
            },
            {
             "title": "为什么缺口太大会反弹",
@@ -38939,6 +38970,18 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
               "lit_id": "L12",
               "lit_title": "Metabolic adaptation is not a major barrier to weight-loss maintenance",
               "supports": "研究表明代谢适应与体重反弹无显著关联，其幅度反映减重程度而非长期损伤，支持恢复饮食后代谢可回升。"
+             },
+             {
+              "claim": "你的身体以为闹饥荒了，会主动降低基础代谢",
+              "lit_id": "L5",
+              "lit_title": "Effect of calorie restriction on resting metabolic rate",
+              "supports": "研究显示热量限制期间静息代谢率出现适应性下降，超出体重减轻预期的幅度。"
+             },
+             {
+              "claim": "如果蛋白质摄入不足，身体还会流失肌肉",
+              "lit_id": "L9",
+              "lit_title": "High-Quality Weight Loss in Obesity: Importance of Skeletal Muscle",
+              "supports": "减重期蛋白质不足与骨骼肌流失相关，保肌是高质量减重的关键。"
              }
             ]
            },
@@ -38965,7 +39008,14 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
             "title": "工具的正确用法",
             "text": "公式算出的热量缺口只是理论值。你每天少吃500千卡，但身体可能根本不需要减这么多。怎么办？别迷信公式，用数据校准。这里点名一个常用公式——Mifflin-St Jeor公式，它估算基础代谢的误差在±10%左右，只能当起点，不能当真理。第一，连续两周每天吃同样的东西，记录体重和腰围。若体重不变，说明当前摄入就是维持热量。第二，但不要吃太少，至少要满足身体的基本需求——不要低于你的静息代谢率。第三，每周称三次体重取平均，若两周内下降超1公斤，说明减太快，适当加回。记住，减肥不是数学题，是生物学。身体会适应和反抗，你要做的是聪明调整。",
             "content": "公式算出的热量缺口只是理论值。你每天少吃500千卡，但身体可能根本不需要减这么多。怎么办？别迷信公式，用数据校准。这里点名一个常用公式——Mifflin-St Jeor公式，它估算基础代谢的误差在±10%左右，只能当起点，不能当真理。第一，连续两周每天吃同样的东西，记录体重和腰围。若体重不变，说明当前摄入就是维持热量。第二，但不要吃太少，至少要满足身体的基本需求——不要低于你的静息代谢率。第三，每周称三次体重取平均，若两周内下降超1公斤，说明减太快，适当加回。记住，减肥不是数学题，是生物学。身体会适应和反抗，你要做的是聪明调整。",
-            "annotations": []
+            "annotations": [
+             {
+              "claim": "它估算基础代谢的误差在±10%左右",
+              "lit_id": "L1",
+              "lit_title": "Centile reference chart for resting metabolic rate through the life course",
+              "supports": "RMR 百分位分布显示个体偏离群体预测值可达 ±10% 以上，公式只能作起点。"
+             }
+            ]
            },
            {
             "title": "情绪收尾+下集预告",
@@ -39226,7 +39276,8 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
         "at": "2026-09-02 15:04:32"
        },
        "structure_locked_at": "2026-09-02 15:05:16",
-       "delivered_at": "2026-09-02 15:17:24"
+       "delivered_at": "2026-09-02 15:17:24",
+       "rework_from_delivered": "2026-09-02 15:52:09"
       }
      }
     ],
@@ -40710,6 +40761,18 @@ B族维生素：参与能量代谢和细胞修复。全谷物、瘦肉、蛋类�
      {
       "at": "2026-09-02 15:17:24",
       "what": "选题「减肥总反弹？先搞懂热量缺口是怎么骗你的」流入生产排期，建议拍摄日 2026-09-04"
+     },
+     {
+      "at": "2026-09-02 15:52:09",
+      "what": "选题「减肥总反弹？先搞懂热量缺口是怎么骗你的」交付后返修，回到撰稿阶段"
+     },
+     {
+      "at": "2026-09-02 15:52:09",
+      "what": "选题「减肥总反弹？先搞懂热量缺口是怎么骗你的」返修，生产排期占位卡已撤除（重新交付后自动再建）"
+     },
+     {
+      "at": "2026-09-02 15:52:09",
+      "what": "流水线回退到「draft」阶段（选题 B10），历史内容保留"
      }
     ]
    },
